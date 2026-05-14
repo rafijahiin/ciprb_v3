@@ -1,7 +1,7 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-{% load static %}
 <meta charset="UTF-8">
 <title>Reports · CIPRB M&E Dashboard</title>
 <link rel="stylesheet" href="{% static 'shared/common.css' %}">
@@ -381,6 +381,17 @@
 </style>
 </head>
 <body>
+<template id="__bundler_thumbnail" data-bg-color="#f7f8fb">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect x="8" y="10" width="84" height="14" fill="#059669" rx="2"/>
+    <rect x="8" y="30" width="84" height="34" fill="#e6eaf2" rx="2"/>
+    <rect x="12" y="36" width="20" height="6" fill="#059669"/>
+    <rect x="12" y="46" width="60" height="3" fill="#94a3b8"/>
+    <rect x="12" y="52" width="50" height="3" fill="#94a3b8"/>
+    <rect x="8" y="70" width="40" height="22" fill="#e6eaf2" rx="2"/>
+    <rect x="52" y="70" width="40" height="22" fill="#e6eaf2" rx="2"/>
+  </svg>
+</template>
 <div class="dash" data-screen-label="Reports Tab">
 
   <!-- ─── Header ─── -->
