@@ -1,0 +1,133 @@
+/* =========================================================================
+   CIPRB M&E Dashboard — Design Tokens (LIGHT / PAPER theme)
+   Inverted from the source codebase's near-black slate-950 palette to a
+   clinical print-feel light theme on user direction. Source repo:
+   rafijahiin/ciprb_v2 → dashboard/templates/dashboard/main.html
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap');
+
+:root {
+  /* ---------- Surface stack ----------
+     A near-white slate stack. The body sits on --bg; cards / sticky header
+     elevate to white; borders and hover use a cool grey one step warmer. */
+  --bg:           #f7f8fb;   /* page */
+  --surface:      #ffffff;   /* cards, header, dropdowns */
+  --surface-2:    #e6eaf2;   /* borders, hover, dividers, dashed outlines */
+  --border:       #e6eaf2;   /* alias */
+  --hover:        rgba(15,23,42,0.03); /* table row hover — slight ink wash */
+  --dashed:       #cfd6e4;
+
+  /* ---------- Text ---------- */
+  --fg:           #0f172a;   /* slate-900 — body */
+  --fg-muted:     #64748b;   /* slate-500 — labels, meta */
+  --fg-faint:     #94a3b8;   /* slate-400 — utility marks (header subtitle, clock) */
+
+  /* ---------- Semantic accents ----------
+     Five hues, each shifted darker so they stay readable on white surfaces.
+     Pair with the lighter `*-bright` value for the glow / pulse-dot fill. */
+  --green:         #059669;   /* PRIMARY · success · OPERATED · IMPLEMENTED */
+  --green-2:       #047857;   /* primary button hover */
+  --green-bright:  #10b981;   /* the brand pulse dot (kept vibrant) */
+  --amber:         #b45309;   /* warning · FUNDED · district bars */
+  --amber-bright:  #d97706;
+  --red:           #dc2626;   /* critical · alert · IDENTIFIED · pending MPDSR */
+  --red-bright:    #ef4444;
+  --blue:          #2563eb;   /* informational · beneficiary · 2nd partner */
+  --blue-bright:   #3b82f6;
+  --purple:        #9333ea;   /* training · 3rd partner */
+  --purple-bright: #a855f7;
+
+  /* ---------- Badge tints (~12% over surface) ---------- */
+  --tint-green:   rgba(5,150,105,0.12);
+  --tint-amber:   rgba(180,83,9,0.12);
+  --tint-red:     rgba(220,38,38,0.10);
+  --tint-slate:   rgba(100,116,139,0.12);
+  --tint-red-5:   rgba(220,38,38,0.06);   /* alert-critical card body */
+  --tint-amber-5: rgba(180,83,9,0.06);    /* alert-warning card body */
+
+  /* ---------- Type ---------- */
+  --font-sans:    'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono:    'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-bn:      'Noto Sans Bengali', 'IBM Plex Sans', sans-serif;
+
+  /* Type scale */
+  --t-eyebrow:    0.68rem;
+  --t-label:      0.70rem;
+  --t-meta:       0.75rem;
+  --t-body:       0.85rem;
+  --t-h-sm:       1.5rem;
+  --t-h-md:       1.8rem;
+  --t-h-lg:       2.2rem;
+
+  --track-eyebrow: 0.10em;
+  --track-badge:   0.04em;
+  --track-nav:     0.06em;
+
+  /* ---------- Geometry ---------- */
+  --r-card:       8px;
+  --r-input:      4px;
+  --r-badge:      3px;
+  --r-pill:       50%;
+
+  --gap-sm:  8px;
+  --gap-md:  12px;
+  --gap-lg:  16px;
+  --gap-xl:  20px;
+  --gap-2xl: 24px;
+
+  --pad-card:    20px;
+  --pad-card-sm: 16px;
+  --pad-cell:    10px 12px;
+
+  --header-h:    52px;
+  --content-max: 1400px;
+
+  /* ---------- Effects ---------- */
+  --glow-green: 0 0 8px rgba(16,185,129,0.55);  /* softer glow for light bg */
+  --shadow-card: 0 1px 2px rgba(15,23,42,0.04); /* optional thin card shadow on white */
+  --anim-fast:  0.15s;
+}
+
+/* =========================================================================
+   Semantic element styles
+   ========================================================================= */
+
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  margin: 0;
+}
+body { font-size: var(--t-body); line-height: 1.5; }
+
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-sans); font-weight: 600; margin: 0; }
+h1 { font-size: var(--t-h-lg); }
+h2 { font-size: var(--t-h-md); }
+h3 { font-size: var(--t-h-sm); }
+
+.eyebrow, .section-label {
+  font-family: var(--font-mono);
+  font-size: var(--t-eyebrow);
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--track-eyebrow);
+  font-weight: 500;
+}
+
+label {
+  font-family: var(--font-mono);
+  font-size: var(--t-meta);
+  color: var(--fg-muted);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.stat-num, .kpi-num {
+  font-family: var(--font-mono);
+  font-size: var(--t-h-lg);
+  font-weight: 600;
+  line-height: 1;
+}
+
+code, kbd, .mono { font-family: var(--font-mono); }
