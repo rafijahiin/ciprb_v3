@@ -1,46 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Infographic Report</title>
-    <style>
-        body { font-family: sans-serif; margin: 0; padding: 20px; color: #333; }
-        .header { text-align: center; background-color: #10b981; color: white; padding: 20px; border-radius: 10px; }
-        .section { margin-top: 30px; }
-        .card-container { display: flex; justify-content: space-between; }
-        .card { width: 45%; background-color: #f3f4f6; padding: 20px; border-radius: 10px; box-sizing: border-box; }
-        .number { font-size: 3em; font-weight: bold; color: #10b981; }
-        .rose-number { color: #f43f5e; }
-        .amber-number { color: #f59e0b; }
-    </style>
+<meta charset="UTF-8">
+<title>CIPRB M&E Report {{ month_name }} {{ year }}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, Helvetica, sans-serif; background: white; color: #2D3748; font-size: 10.5pt; }
+  .page { width: 210mm; min-height: 297mm; }
+  .header-stripe { height: 8px; background: #009EDB; }
+  .header { background: #1A3668; padding: 18px 26px; display: flex; justify-content: space-between; align-items: center; }
+  .header h1 { color: white; font-size: 17pt; font-weight: 900; }
+  .header p { color: rgba(255,255,255,0.7); font-size: 8.5pt; margin-top: 3px; }
+  .header-badge { background: #009EDB; color: white; font-weight: 900; font-size: 13pt; padding: 5px 14px; border-radius: 3px; letter-spacing: 0.12em; }
+  .header-period { color: rgba(255,255,255,0.65); font-size: 8pt; margin-top: 5px; text-align: right; }
+  .body { padding: 18px 26px; }
+  .section-label { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #718096; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 2px solid #009EDB; display: inline-block; }
+  .context { background: #EBF8FF; border-left: 4px solid #009EDB; padding: 9px 13px; margin-bottom: 16px; font-size: 8.5pt; line-height: 1.5; color: #2D3748; border-radius: 0 4px 4px 0; }
+  .kpi-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .kpi { flex: 1; padding: 12px; border-radius: 5px; border-top: 4px solid; }
+  .kpi.blue  { background: #EBF8FF; border-color: #009EDB; }
+  .kpi.teal  { background: #E6FFFA; border-color: #00A19A; }
+  .kpi.purple{ background: #FAF5FF; border-color: #805AD5; }
+  .kpi.green { background: #F0FFF4; border-color: #38A169; }
+  .kpi.red   { background: #FFF5F5; border-color: #E53E3E; }
+  .kpi-label { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #718096; margin-bottom: 3px; }
+  .kpi-val   { font-size: 24pt; font-weight: 900; line-height: 1; }
+  .kpi.blue .kpi-val   { color: #009EDB; }
+  .kpi.teal .kpi-val   { color: #00A19A; }
+  .kpi.purple .kpi-val { color: #805AD5; }
+  .kpi.green .kpi-val  { color: #38A169; }
+  .kpi.red .kpi-val    { color: #E53E3E; }
+  .kpi-sub { font-size: 7.5pt; color: #718096; margin-top: 3px; }
+  .prog-track { height: 5px; background: #CBD5E0; border-radius: 3px; overflow: hidden; margin-top: 5px; }
+  .prog-fill  { height: 100%; border-radius: 3px; background: #009EDB; }
+  .pipeline { display: flex; background: #FAFAFA; border: 1px solid #E2E8F0; border-radius: 5px; overflow: hidden; margin-bottom: 16px; }
+  .pip { flex: 1; padding: 11px 8px; text-align: center; border-right: 1px solid #E2E8F0; }
+  .pip:last-child { border-right: none; }
+  .pip-val   { font-size: 20pt; font-weight: 900; color: #009EDB; }
+  .pip-label { font-size: 7pt; color: #718096; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
+  .pip-bar   { height: 4px; background: #E2E8F0; border-radius: 2px; margin-top: 7px; overflow: hidden; }
+  .pip-fill  { height: 100%; background: #009EDB; border-radius: 2px; }
+  .two-col { display: flex; gap: 12px; margin-bottom: 16px; }
+  .box { flex: 1; background: #FAFAFA; border: 1px solid #E2E8F0; border-radius: 5px; padding: 13px; }
+  .action-gauge { text-align: center; }
+  .gauge-num   { font-size: 34pt; font-weight: 900; color: #009EDB; }
+  .gauge-label { font-size: 8pt; color: #718096; line-height: 1.4; }
+  .action-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .ai-val   { font-size: 14pt; font-weight: 900; width: 36px; }
+  .ai-label { font-size: 8pt; color: #718096; flex: 1; }
+  .ai-track { flex: 2; height: 7px; background: #E2E8F0; border-radius: 3px; overflow: hidden; }
+  .ai-fill  { height: 100%; border-radius: 3px; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+  .data-table th { background: #1A3668; color: white; padding: 6px 9px; font-size: 7pt; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; text-align: left; }
+  .data-table td { padding: 6px 9px; border-bottom: 1px solid #EDF2F7; }
+  .data-table tr:nth-child(even) td { background: #F7FAFC; }
+  .badge { display: inline-block; padding: 1px 7px; border-radius: 3px; font-size: 7pt; font-weight: 700; }
+  .b-red    { background: #FFF5F5; color: #C53030; }
+  .b-green  { background: #F0FFF4; color: #276749; }
+  .b-yellow { background: #FFFFF0; color: #B7791F; }
+  .b-gray   { background: #F7FAFC; color: #4A5568; }
+  .partner-grid { display: flex; gap: 8px; margin-bottom: 16px; }
+  .partner-card { flex: 1; background: white; border: 1px solid #E2E8F0; border-radius: 5px; padding: 10px; }
+  .partner-name { font-size: 8.5pt; font-weight: 700; color: #1A3668; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 7px; padding-bottom: 4px; border-bottom: 2px solid #009EDB; }
+  .p-row { display: flex; justify-content: space-between; font-size: 8pt; padding: 2px 0; border-bottom: 1px solid #F7FAFC; }
+  .p-val { font-weight: 700; color: #009EDB; }
+  .equity-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .eq-item { flex: 1; text-align: center; background: #EBF8FF; border-radius: 5px; padding: 9px; border: 1px solid #BEE3F8; }
+  .eq-val   { font-size: 16pt; font-weight: 900; color: #009EDB; }
+  .eq-label { font-size: 7pt; color: #718096; margin-top: 2px; font-weight: 600; }
+  .footer { background: #1A3668; padding: 10px 26px; display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+  .footer-l { color: rgba(255,255,255,0.55); font-size: 7pt; }
+  .footer-c { color: rgba(255,255,255,0.35); font-size: 6.5pt; text-align: center; }
+  .footer-r { color: rgba(255,255,255,0.55); font-size: 7pt; text-align: right; }
+</style>
 </head>
 <body>
-    <div class="header">
-        <h1>Monthly Impact Report</h1>
-        <p>CIPRB - Fistula & MPDSR Tracking</p>
+<div class="page">
+
+<div class="header-stripe"></div>
+<div class="header">
+  <div>
+    <h1>CIPRB M&amp;E Monthly Report</h1>
+    <p>UNFPA Bangladesh · SRHR/RCH · Fistula &amp; MPDSR Programme Monitoring</p>
+  </div>
+  <div>
+    <div class="header-badge">UNFPA</div>
+    <div class="header-period">{{ month_name }} {{ year }}<br>CIPRB · PHD · Bondhu</div>
+  </div>
+</div>
+
+<div class="body">
+
+<div class="context">
+  This report covers programme performance for the CIPRB-UNFPA SRHR/RCH project under Bangladesh's 10th Country Programme (2022–2026), tracking fistula campaign outcomes, MPDSR events and corrective actions, partner activities, and capacity building across priority districts.
+</div>
+
+<div class="section-label">Key Performance Indicators</div>
+<div class="kpi-row">
+  <div class="kpi blue">
+    <div class="kpi-label">Fistula Operated</div>
+    <div class="kpi-val">{{ fistula_operated }}</div>
+    <div class="kpi-sub">of {{ fistula_goal }} target</div>
+    <div class="prog-track"><div class="prog-fill" style="width:{{ fistula_progress }}%;"></div></div>
+    <div class="kpi-sub" style="margin-top:3px;">{{ fistula_progress }}% of goal</div>
+  </div>
+  <div class="kpi red">
+    <div class="kpi-label">MPDSR Events</div>
+    <div class="kpi-val">{{ total_mpdsr }}</div>
+    <div class="kpi-sub">{{ pending_mpdsr }} pending action</div>
+  </div>
+  <div class="kpi purple">
+    <div class="kpi-label">Beneficiaries</div>
+    <div class="kpi-val">{{ total_beneficiaries }}</div>
+    <div class="kpi-sub">across all activities</div>
+  </div>
+  <div class="kpi green">
+    <div class="kpi-label">Staff Trained</div>
+    <div class="kpi-val">{{ total_participants }}</div>
+    <div class="kpi-sub">{{ total_training_sessions }} sessions held</div>
+  </div>
+  <div class="kpi teal">
+    <div class="kpi-label">Action Rate</div>
+    <div class="kpi-val">{{ action_gap_percent }}%</div>
+    <div class="kpi-sub">MPDSR actions done</div>
+  </div>
+</div>
+
+<div class="section-label">Fistula Referral Pipeline</div>
+<div class="pipeline">
+  {% for label, count in pipeline.items %}
+  <div class="pip">
+    <div class="pip-val">{{ count }}</div>
+    <div class="pip-label">{{ label }}</div>
+    <div class="pip-bar"><div class="pip-fill" style="width:{% if fistula_total > 0 %}{% widthratio count fistula_total 100 %}{% else %}0{% endif %}%;"></div></div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="two-col">
+  <div class="box action-gauge">
+    <div class="section-label">Data-to-Action Gap</div>
+    <div style="margin-top:12px;">
+      <div class="gauge-num">{{ action_gap_percent }}%</div>
+      <div class="gauge-label">of MPDSR recommended<br>actions implemented</div>
     </div>
-    <div class="section">
-        <h2>Executive Summary</h2>
-        <div class="card-container">
-            <div class="card">
-                <h3>Fistula Operations</h3>
-                <div class="number">{{ fistula_operated }}</div>
-                <p>Successful Surgeries</p>
-            </div>
-            <div class="card">
-                <h3>MPDSR Deaths</h3>
-                <div class="number rose-number">{{ total_deaths }}</div>
-                <p>Reported Cases</p>
-            </div>
-        </div>
+  </div>
+  <div class="box" style="flex:2;">
+    <div class="section-label">Action Status Breakdown</div>
+    <div style="margin-top:8px;">
+      <div class="action-item">
+        <div class="ai-val" style="color:#38A169;">{{ implemented_mpdsr }}</div>
+        <div class="ai-label">Implemented</div>
+        <div class="ai-track"><div class="ai-fill" style="background:#38A169;width:{% if total_mpdsr > 0 %}{{ action_gap_percent }}{% else %}0{% endif %}%;"></div></div>
+      </div>
+      <div class="action-item">
+        <div class="ai-val" style="color:#E53E3E;">{{ pending_mpdsr }}</div>
+        <div class="ai-label">Pending — follow-up required</div>
+        <div class="ai-track"><div class="ai-fill" style="background:#E53E3E;width:{% if total_mpdsr > 0 %}{{ pending_pct }}{% else %}0{% endif %}%;"></div></div>
+      </div>
+      <div class="action-item">
+        <div class="ai-val" style="color:#D69E2E;">{{ funded_mpdsr }}</div>
+        <div class="ai-label">Funded — in progress</div>
+        <div class="ai-track"><div class="ai-fill" style="background:#D69E2E;width:{% if total_mpdsr > 0 %}{{ funded_pct }}{% else %}0{% endif %}%;"></div></div>
+      </div>
+      <div class="action-item">
+        <div class="ai-val" style="color:#718096;">{{ stalled_mpdsr }}</div>
+        <div class="ai-label">Stalled — escalation needed</div>
+        <div class="ai-track"><div class="ai-fill" style="background:#718096;width:{% if total_mpdsr > 0 %}{{ stalled_pct }}{% else %}0{% endif %}%;"></div></div>
+      </div>
     </div>
-    <div class="section">
-        <h2>Data-to-Action Gap</h2>
-        <div class="card" style="width: 100%;">
-            <h3>Implemented Actions</h3>
-            <div class="number amber-number">{{ action_gap_percent|floatformat:1 }}%</div>
-            <p>Percentage of recommended actions successfully implemented.</p>
-        </div>
-    </div>
+  </div>
+</div>
+
+<div class="section-label">MPDSR Events by District</div>
+<div style="margin-bottom:16px;">
+<table class="data-table">
+  <thead><tr><th>#</th><th>District</th><th>Deaths Reported</th><th>Burden Level</th></tr></thead>
+  <tbody>
+  {% for d in by_district %}
+  <tr>
+    <td>{{ forloop.counter }}</td>
+    <td><strong>{{ d.district }}</strong></td>
+    <td>{{ d.count }}</td>
+    <td>{% if d.count > 2 %}<span class="badge b-red">High</span>{% else %}<span class="badge b-yellow">Moderate</span>{% endif %}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="4" style="text-align:center;color:#718096;padding:14px;">No data available</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+
+<div class="section-label">Partner Performance</div>
+<div class="partner-grid">
+  {% for partner, data in partner_data.items %}
+  <div class="partner-card">
+    <div class="partner-name">{{ partner }}</div>
+    <div class="p-row"><span>Activities</span><span class="p-val">{{ data.activities }}</span></div>
+    <div class="p-row"><span>Beneficiaries</span><span class="p-val">{{ data.beneficiaries }}</span></div>
+    <div class="p-row"><span>Trainings</span><span class="p-val">{{ data.trainings }}</span></div>
+    <div class="p-row"><span>Staff Trained</span><span class="p-val">{{ data.participants }}</span></div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="section-label">Equity &amp; Leave No One Behind</div>
+<div class="equity-row">
+  <div class="eq-item">
+    <div class="eq-val">{{ equity_disability }}</div>
+    <div class="eq-label">Patients with<br>Disability</div>
+  </div>
+  <div class="eq-item">
+    <div class="eq-val">{{ equity_ethnic }}</div>
+    <div class="eq-label">Ethnic Minority<br>Patients</div>
+  </div>
+  <div class="eq-item">
+    <div class="eq-val">{{ equity_displaced }}</div>
+    <div class="eq-label">Internally<br>Displaced</div>
+  </div>
+  <div class="eq-item" style="background:#E6FFFA;border-color:#B2F5EA;">
+    <div class="eq-val" style="color:#00A19A;">{{ equity_total }}</div>
+    <div class="eq-label">Total Marginalised<br>Reached</div>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  <div class="footer-l">CIPRB · UNFPA Bangladesh<br>SRHR/RCH Programme</div>
+  <div class="footer-c">CONFIDENTIAL — FOR PROGRAMME USE ONLY · Generated: {{ generated_date }}</div>
+  <div class="footer-r">10th Country Programme<br>2022–2026</div>
+</div>
+
+</div>
 </body>
 </html>
