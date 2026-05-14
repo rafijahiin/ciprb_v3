@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIPRB M&E — Sign In</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .top-bar {
+            background: #009EDB;
+            height: 6px;
+        }
+        .unfpa-header {
+            background: #1A3668;
+            padding: 16px 40px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .unfpa-logo-text {
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+        }
+        .unfpa-divider {
+            width: 1px;
+            height: 28px;
+            background: rgba(255,255,255,0.3);
+        }
+        .unfpa-sub {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.85rem;
+        }
+        .page {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 420px;
+            overflow: hidden;
+        }
+        .card-header {
+            background: #009EDB;
+            padding: 32px;
+            text-align: center;
+        }
+        .card-header h1 {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .card-header p {
+            color: rgba(255,255,255,0.85);
+            font-size: 0.85rem;
+        }
+        .card-body {
+            padding: 32px;
+        }
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 6px;
+        }
+        input[type=text], input[type=password] {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e0;
+            border-radius: 3px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: #2d3748;
+            margin-bottom: 20px;
+            transition: border-color 0.15s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #009EDB;
+            box-shadow: 0 0 0 3px rgba(0,158,219,0.1);
+        }
+        .btn-login {
+            width: 100%;
+            background: #009EDB;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 3px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            letter-spacing: 0.04em;
+            transition: background 0.15s;
+        }
+        .btn-login:hover { background: #0081b5; }
+        .error {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            color: #c53030;
+            padding: 10px 14px;
+            border-radius: 3px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+        .footer-note {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #a0aec0;
+            margin-top: 24px;
+        }
+        .unfpa-footer {
+            background: #1A3668;
+            color: rgba(255,255,255,0.6);
+            text-align: center;
+            padding: 12px;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar"></div>
+    <div class="unfpa-header">
+        <div class="unfpa-logo-text">UNFPA</div>
+        <div class="unfpa-divider"></div>
+        <div class="unfpa-sub">United Nations Population Fund — Bangladesh</div>
+    </div>
+    <div class="page">
+        <div class="card">
+            <div class="card-header">
+                <h1>CIPRB M&amp;E Dashboard</h1>
+                <p>UNFPA-SRHR · Reproductive &amp; Child Health Unit</p>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                <div class="error">{{ error }}</div>
+                {% endif %}
+                <form method="post">
+                    {% csrf_token %}
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" autofocus required>
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                    <button type="submit" class="btn-login">Sign In</button>
+                </form>
+                <div class="footer-note">Contact your administrator for access</div>
+            </div>
+        </div>
+    </div>
+    <div class="unfpa-footer">
+        © UNFPA Bangladesh · CIPRB M&amp;E Digital System · Confidential
+    </div>
+</body>
+</html>

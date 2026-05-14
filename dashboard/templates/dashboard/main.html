@@ -1,0 +1,557 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIPRB M&E Dashboard — UNFPA Bangladesh</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --unfpa-blue: #009EDB;
+            --unfpa-dark: #1A3668;
+            --unfpa-teal: #00A19A;
+            --unfpa-light: #E8F4FB;
+            --unfpa-pale: #F0F7FF;
+            --bg: #F5F7FA;
+            --surface: #FFFFFF;
+            --border: #E2E8F0;
+            --text: #2D3748;
+            --muted: #718096;
+            --green: #38A169;
+            --red: #E53E3E;
+            --amber: #D69E2E;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Source Sans 3', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; box-shadow: var(--shadow); }
+        .stat-num { font-size: 2.2rem; font-weight: 700; line-height: 1; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.03em; }
+        .badge-p  { background: #FFF5F5; color: #C53030; border: 1px solid #FED7D7; }
+        .badge-f  { background: #FFFFF0; color: #B7791F; border: 1px solid #FAF089; }
+        .badge-i  { background: #F0FFF4; color: #276749; border: 1px solid #C6F6D5; }
+        .badge-s  { background: #F7FAFC; color: #4A5568; border: 1px solid #E2E8F0; }
+        .nav-btn { padding: 6px 14px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.03em; color: rgba(255,255,255,0.7); cursor: pointer; background: none; border: none; transition: all 0.15s; font-family: inherit; }
+        .nav-btn:hover { color: white; background: rgba(255,255,255,0.15); }
+        .nav-btn.active { color: white; background: rgba(255,255,255,0.2); border-bottom: 2px solid white; }
+        .section { display: none; }
+        .section.active { display: block; }
+        label { font-size: 0.8rem; font-weight: 600; color: var(--muted); display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.04em; }
+        input, select, textarea { background: white; border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 4px; width: 100%; font-size: 0.9rem; font-family: inherit; transition: border-color 0.15s; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--unfpa-blue); box-shadow: 0 0 0 3px rgba(0,158,219,0.1); }
+        .btn { padding: 8px 18px; border-radius: 4px; font-size: 0.82rem; font-weight: 700; cursor: pointer; border: none; font-family: inherit; text-decoration: none; display: inline-block; transition: all 0.15s; letter-spacing: 0.02em; }
+        .btn-primary { background: var(--unfpa-blue); color: white; }
+        .btn-primary:hover { background: #0081b5; }
+        .btn-teal { background: var(--unfpa-teal); color: white; }
+        .btn-teal:hover { background: #007f7a; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+        .btn-outline:hover { border-color: var(--unfpa-blue); color: var(--unfpa-blue); }
+        .btn-dark { background: var(--unfpa-dark); color: white; }
+        table { width: 100%; border-collapse: collapse; }
+        th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); font-weight: 600; padding: 10px 14px; border-bottom: 2px solid var(--border); text-align: left; background: #FAFAFA; }
+        td { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 0.88rem; vertical-align: middle; }
+        tr:hover td { background: var(--unfpa-pale); }
+        .alert-c { border-left: 4px solid var(--red); background: #FFF5F5; }
+        .alert-w { border-left: 4px solid var(--amber); background: #FFFFF0; }
+        .bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 3px; }
+        .pip-step { text-align: center; padding: 12px; border-right: 1px solid var(--border); }
+        .pip-step:last-child { border-right: none; }
+        .pip-val { font-size: 2rem; font-weight: 700; }
+        .section-header { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--unfpa-blue); display: inline-block; }
+        .role-tag { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; background: rgba(255,255,255,0.2); color: white; }
+        .empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
+        .empty-state p { margin-bottom: 16px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<!-- UNFPA Top Strip -->
+<div style="height:4px;background:linear-gradient(90deg,#009EDB,#00A19A);"></div>
+
+<!-- Header -->
+<header style="background:var(--unfpa-dark);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;">
+    <div style="display:flex;align-items:center;gap:16px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+            <div style="background:var(--unfpa-blue);color:white;font-weight:700;font-size:0.85rem;padding:4px 8px;border-radius:3px;letter-spacing:0.08em;">UNFPA</div>
+            <div style="width:1px;height:24px;background:rgba(255,255,255,0.2);"></div>
+            <span style="color:white;font-weight:600;font-size:0.95rem;">CIPRB M&amp;E Dashboard</span>
+            <span style="color:rgba(255,255,255,0.4);font-size:0.8rem;">· SRHR / RCH</span>
+        </div>
+    </div>
+    <nav style="display:flex;gap:2px;">
+        <button class="nav-btn active" onclick="show('overview',this)">Overview</button>
+        <button class="nav-btn" onclick="show('fistula',this)">Fistula</button>
+        <button class="nav-btn" onclick="show('mpdsr',this)">MPDSR</button>
+        {% if is_unfpa_admin or is_org_admin %}<button class="nav-btn" onclick="show('partners',this)">Partners</button>{% endif %}
+        {% if can_enter_data %}<button class="nav-btn" onclick="show('activities',this)">Activities</button>{% endif %}
+        {% if can_enter_data %}<button class="nav-btn" onclick="show('training',this)">Training</button>{% endif %}
+        <button class="nav-btn" onclick="show('reports',this)">Reports</button>
+    </nav>
+    <div style="display:flex;align-items:center;gap:12px;">
+        <span class="role-tag">{{ user_role }}</span>
+        <span style="color:rgba(255,255,255,0.6);font-size:0.82rem;">{{ request.user.get_full_name|default:request.user.username }}</span>
+        <a href="/accounts/logout/" style="color:rgba(255,255,255,0.5);font-size:0.78rem;text-decoration:none;border:1px solid rgba(255,255,255,0.2);padding:3px 10px;border-radius:3px;">Sign out</a>
+    </div>
+</header>
+
+<main style="padding:24px;max-width:1400px;margin:0 auto;">
+
+<!-- ══ OVERVIEW ══ -->
+<div id="s-overview" class="section active">
+
+    {% if alerts %}
+    <div style="margin-bottom:20px;">
+        <div class="section-header">⚠ Behind-Target Alerts</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:8px;">
+            {% for a in alerts %}
+            <div class="card" style="padding:16px;" class="alert-{% if a.level == 'critical' %}c{% else %}w{% endif %}">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                    <div>
+                        <div style="font-size:0.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;">{{ a.partner }}</div>
+                        <div style="font-size:0.9rem;margin-top:4px;color:var(--text);">{{ a.actual }} / {{ a.target }} activities</div>
+                    </div>
+                    <span style="font-size:1.4rem;font-weight:700;color:{% if a.level == 'critical' %}var(--red){% else %}var(--amber){% endif %};">{{ a.pct }}%</span>
+                </div>
+                <div class="bar" style="margin-top:10px;"><div class="bar-fill" style="width:{{ a.pct }}%;background:{% if a.level == 'critical' %}var(--red){% else %}var(--amber){% endif %};"></div></div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;">
+        <div class="card" style="padding:20px;border-top:3px solid var(--unfpa-blue);">
+            <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;">Fistula Operated</div>
+            <div class="stat-num" style="color:var(--unfpa-blue);">{{ fistula_operated }}</div>
+            <div style="font-size:0.78rem;color:var(--muted);margin-top:6px;">of {{ fistula_goal }} target · {{ fistula_progress }}%</div>
+            <div class="bar" style="margin-top:10px;"><div class="bar-fill" style="width:{{ fistula_progress }}%;background:var(--unfpa-blue);"></div></div>
+        </div>
+        <div class="card" style="padding:20px;border-top:3px solid var(--unfpa-teal);">
+            <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;">MPDSR Events</div>
+            <div class="stat-num" style="color:var(--unfpa-teal);">{{ total_mpdsr }}</div>
+            <div style="font-size:0.78rem;color:var(--muted);margin-top:6px;">{{ pending_mpdsr }} pending corrective action</div>
+        </div>
+        <div class="card" style="padding:20px;border-top:3px solid #805AD5;">
+            <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;">Beneficiaries Reached</div>
+            <div class="stat-num" style="color:#805AD5;">{{ total_beneficiaries }}</div>
+            <div style="font-size:0.78rem;color:var(--muted);margin-top:6px;">across all field activities</div>
+        </div>
+        <div class="card" style="padding:20px;border-top:3px solid var(--green);">
+            <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;">Staff Trained</div>
+            <div class="stat-num" style="color:var(--green);">{{ total_participants }}</div>
+            <div style="font-size:0.78rem;color:var(--muted);margin-top:6px;">in {{ total_training_sessions }} sessions</div>
+        </div>
+    </div>
+
+    <!-- Quick data entry buttons -->
+    {% if can_enter_data %}
+    <div style="background:var(--unfpa-light);border:1px solid #BEE3F8;border-radius:6px;padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span style="font-size:0.78rem;font-weight:700;color:var(--unfpa-dark);text-transform:uppercase;letter-spacing:0.06em;">Data Collection:</span>
+        {% if kobo_fistula_url %}
+        <a href="{{ kobo_fistula_url }}" target="_blank" class="btn btn-primary">📋 Fistula Form</a>
+        {% endif %}
+        {% if kobo_mpdsr_url %}
+        <a href="{{ kobo_mpdsr_url }}" target="_blank" class="btn btn-teal">📋 MPDSR Form</a>
+        {% endif %}
+        {% if kobo_baseline_url %}
+        <a href="{{ kobo_baseline_url }}" target="_blank" class="btn btn-dark">📋 Baseline Form</a>
+        {% endif %}
+        <a href="#" onclick="show('activities',document.querySelectorAll('.nav-btn')[4]);return false;" class="btn btn-outline">+ Log Activity</a>
+        <a href="#" onclick="show('training',document.querySelectorAll('.nav-btn')[5]);return false;" class="btn btn-outline">+ Log Training</a>
+    </div>
+    {% endif %}
+
+    <!-- Charts -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;">
+        <div class="card" style="padding:20px;display:flex;flex-direction:column;align-items:center;">
+            <div class="section-header" style="align-self:flex-start;">Fistula Progress</div>
+            <div style="position:relative;width:150px;height:150px;">
+                <canvas id="c-ring"></canvas>
+                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                    <span style="font-size:1.6rem;font-weight:700;color:var(--unfpa-blue);">{{ fistula_progress }}%</span>
+                    <span style="font-size:0.72rem;color:var(--muted);">of goal</span>
+                </div>
+            </div>
+        </div>
+        <div class="card" style="padding:20px;">
+            <div class="section-header">MPDSR Action Status</div>
+            {% if total_mpdsr > 0 %}
+            <div style="position:relative;height:160px;">
+                <canvas id="c-status"></canvas>
+            </div>
+            {% else %}
+            <div style="height:160px;display:flex;align-items:center;justify-content:center;border:2px dashed var(--border);border-radius:4px;">
+                <span style="font-size:0.85rem;color:var(--muted);">No MPDSR data yet</span>
+            </div>
+            {% endif %}
+        </div>
+        <div class="card" style="padding:20px;">
+            <div class="section-header">Deaths by District</div>
+            {% if total_mpdsr > 0 %}
+            <div style="position:relative;height:160px;">
+                <canvas id="c-district"></canvas>
+            </div>
+            {% else %}
+            <div style="height:160px;display:flex;align-items:center;justify-content:center;border:2px dashed var(--border);border-radius:4px;">
+                <span style="font-size:0.85rem;color:var(--muted);">No district data yet</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Fistula Pipeline -->
+    <div class="card" style="margin-bottom:20px;">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+            <div class="section-header" style="margin-bottom:0;border-bottom:none;">Fistula Referral Pipeline</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);">
+            {% for label, count in pipeline.items %}
+            <div class="pip-step">
+                <div class="pip-val" style="color:var(--unfpa-blue);">{{ count }}</div>
+                <div style="font-size:0.78rem;color:var(--muted);margin-top:4px;font-weight:600;">{{ label }}</div>
+                <div class="bar" style="margin-top:10px;"><div class="bar-fill" style="background:var(--unfpa-blue);width:{% if fistula_total > 0 %}{% widthratio count fistula_total 100 %}{% else %}0{% endif %}%;"></div></div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Data-to-Action -->
+    <div class="card" style="padding:20px;">
+        <div class="section-header">Data-to-Action Gap</div>
+        <div style="display:flex;align-items:center;gap:32px;flex-wrap:wrap;">
+            <div style="width:180px;height:90px;position:relative;flex-shrink:0;">
+                <canvas id="c-gauge"></canvas>
+                <div style="position:absolute;bottom:0;left:0;right:0;text-align:center;font-weight:700;font-size:1rem;color:var(--unfpa-dark);">{{ action_gap_percent }}%</div>
+            </div>
+            <div style="display:flex;gap:32px;">
+                <div><div class="stat-num" style="font-size:1.6rem;color:var(--green);">{{ implemented_mpdsr }}</div><div style="font-size:0.78rem;color:var(--muted);margin-top:2px;">Implemented</div></div>
+                <div><div class="stat-num" style="font-size:1.6rem;color:var(--red);">{{ pending_mpdsr }}</div><div style="font-size:0.78rem;color:var(--muted);margin-top:2px;">Pending</div></div>
+                <div><div class="stat-num" style="font-size:1.6rem;color:var(--muted);">{{ stalled_mpdsr }}</div><div style="font-size:0.78rem;color:var(--muted);margin-top:2px;">Stalled</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══ FISTULA ══ -->
+<div id="s-fistula" class="section">
+    <div class="section-header">Fistula Campaign Tracker</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;">
+        {% for label, count in pipeline.items %}
+        <div class="card" style="padding:16px;text-align:center;border-top:3px solid var(--unfpa-blue);">
+            <div class="pip-val" style="color:var(--unfpa-blue);">{{ count }}</div>
+            <div style="font-size:0.78rem;color:var(--muted);margin-top:4px;font-weight:600;">{{ label }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% if can_enter_data and kobo_fistula_url %}
+    <div style="margin-bottom:16px;">
+        <a href="{{ kobo_fistula_url }}" target="_blank" class="btn btn-primary">📋 Open Fistula Data Collection Form</a>
+    </div>
+    {% endif %}
+    <div class="card">
+        <div style="overflow-x:auto;">
+            <table>
+                <thead><tr><th>Patient ID</th><th>District</th><th>Upazila</th><th>Referral Status</th><th>Surgery Outcome</th><th>Equity Markers</th></tr></thead>
+                <tbody>
+                {% for c in fistula_cases %}
+                <tr>
+                    <td style="font-size:0.75rem;color:var(--muted);font-family:monospace;">{{ c.patient_id|stringformat:"s"|truncatechars:12 }}</td>
+                    <td>{{ c.district }}</td><td>{{ c.upazila }}</td>
+                    <td><span class="badge {% if c.referral_status == 'OPERATED' %}badge-i{% elif c.referral_status == 'IDENTIFIED' %}badge-p{% else %}badge-f{% endif %}">{{ c.referral_status }}</span></td>
+                    <td style="color:var(--muted);">{{ c.surgery_outcome }}</td>
+                    <td>{% if c.has_disability %}<span class="badge badge-s">Disability</span> {% endif %}{% if c.is_ethnic_minority %}<span class="badge badge-s">Ethnic</span> {% endif %}{% if c.is_displaced %}<span class="badge badge-s">Displaced</span>{% endif %}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6">
+                    <div class="empty-state">
+                        <p>No fistula cases recorded yet.</p>
+                        {% if kobo_fistula_url %}<a href="{{ kobo_fistula_url }}" target="_blank" class="btn btn-primary">📋 Open Fistula Form in KoboToolbox</a>{% endif %}
+                    </div>
+                </td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ══ MPDSR ══ -->
+<div id="s-mpdsr" class="section">
+    <div class="section-header">MPDSR Event Tracker &amp; Action Log</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+        <div class="card" style="padding:16px;border-top:3px solid var(--unfpa-dark);"><div class="stat-num" style="color:var(--unfpa-dark);">{{ total_mpdsr }}</div><div style="font-size:0.78rem;color:var(--muted);margin-top:4px;">Total Events</div></div>
+        <div class="card" style="padding:16px;border-top:3px solid var(--green);"><div class="stat-num" style="color:var(--green);">{{ implemented_mpdsr }}</div><div style="font-size:0.78rem;color:var(--muted);margin-top:4px;">Implemented</div></div>
+        <div class="card" style="padding:16px;border-top:3px solid var(--red);"><div class="stat-num" style="color:var(--red);">{{ pending_mpdsr }}</div><div style="font-size:0.78rem;color:var(--muted);margin-top:4px;">Pending</div></div>
+        <div class="card" style="padding:16px;border-top:3px solid var(--muted);"><div class="stat-num" style="color:var(--muted);">{{ stalled_mpdsr }}</div><div style="font-size:0.78rem;color:var(--muted);margin-top:4px;">Stalled</div></div>
+    </div>
+    {% if can_enter_data and kobo_mpdsr_url %}
+    <div style="margin-bottom:16px;">
+        <a href="{{ kobo_mpdsr_url }}" target="_blank" class="btn btn-teal">📋 Open MPDSR Reporting Form</a>
+    </div>
+    {% endif %}
+    <div class="card">
+        <div style="overflow-x:auto;">
+            <table>
+                <thead><tr><th>Event ID</th><th>Type</th><th>District</th><th>Facility</th><th>Cause of Death</th><th>Recommended Action</th><th>Status</th></tr></thead>
+                <tbody>
+                {% for event in mpdsr_events %}
+                <tr>
+                    <td style="font-size:0.72rem;color:var(--muted);font-family:monospace;">{{ event.event_id|stringformat:"s"|truncatechars:10 }}</td>
+                    <td><span class="badge badge-p">{{ event.death_type }}</span></td>
+                    <td>{{ event.district }}</td>
+                    <td style="color:var(--muted);">{{ event.facility_name|truncatechars:22 }}</td>
+                    <td style="color:var(--muted);">{{ event.cause_of_death|truncatechars:25 }}</td>
+                    <td style="color:var(--muted);">{{ event.recommended_action|truncatechars:28 }}</td>
+                    <td id="status-cell-{{ event.event_id }}">{% include "dashboard/partials/status_dropdown.html" with event=event %}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7">
+                    <div class="empty-state">
+                        <p>No MPDSR events recorded yet.</p>
+                        {% if kobo_mpdsr_url %}<a href="{{ kobo_mpdsr_url }}" target="_blank" class="btn btn-teal">📋 Open MPDSR Form in KoboToolbox</a>{% endif %}
+                    </div>
+                </td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ══ PARTNERS (UNFPA/Admins only) ══ -->
+{% if is_unfpa_admin or is_org_admin %}
+<div id="s-partners" class="section">
+    <div class="section-header">Partner Performance — {{ user_org }}</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;">
+        {% for partner, data in partner_data.items %}
+        <div class="card" style="padding:20px;border-top:3px solid var(--unfpa-blue);">
+            <div style="font-size:1rem;font-weight:700;color:var(--unfpa-dark);margin-bottom:16px;">{{ partner }}</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);"><span style="font-size:0.85rem;color:var(--muted);">Activities Logged</span><span style="font-weight:700;color:var(--unfpa-blue);">{{ data.activities }}</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);"><span style="font-size:0.85rem;color:var(--muted);">Beneficiaries</span><span style="font-weight:700;color:#805AD5;">{{ data.beneficiaries }}</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);"><span style="font-size:0.85rem;color:var(--muted);">Training Sessions</span><span style="font-weight:700;color:var(--unfpa-teal);">{{ data.trainings }}</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;"><span style="font-size:0.85rem;color:var(--muted);">Staff Trained</span><span style="font-weight:700;color:var(--green);">{{ data.participants }}</span></div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="card" style="padding:20px;">
+            <div class="section-header">Activities by Partner</div>
+            <canvas id="c-pact" height="200"></canvas>
+        </div>
+        <div class="card" style="padding:20px;">
+            <div class="section-header">Beneficiaries by Partner</div>
+            <canvas id="c-pben" height="200"></canvas>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ══ ACTIVITIES ══ -->
+{% if can_enter_data %}
+<div id="s-activities" class="section">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div class="card" style="padding:24px;">
+            <div class="section-header">Log New Activity</div>
+            <form method="post" action="/activities/add/">
+                {% csrf_token %}
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+                    <div><label>Partner</label>
+                        <select name="partner">
+                            {% if is_unfpa_admin %}
+                            <option value="CIPRB">CIPRB</option><option value="PHD">PHD</option><option value="Bondhu">Bondhu</option>
+                            {% else %}
+                            <option value="{{ user_org }}" selected>{{ user_org }}</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div><label>Date</label><input type="date" name="activity_date" required></div>
+                    <div><label>District</label><input type="text" name="district" placeholder="e.g. Dhaka" required></div>
+                    <div><label>Upazila</label><input type="text" name="upazila" placeholder="e.g. Gulshan" required></div>
+                    <div><label>Activity Type</label><input type="text" name="activity_type" placeholder="e.g. Outreach Visit" required></div>
+                    <div><label>Staff Name</label><input type="text" name="staff_name" placeholder="Full name" required></div>
+                    <div><label>Beneficiary Count</label><input type="number" name="beneficiary_count" value="0" min="0"></div>
+                    <div><label>Notes</label><input type="text" name="notes" placeholder="Optional"></div>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Activity</button>
+            </form>
+        </div>
+        <div class="card" style="padding:24px;">
+            <div class="section-header">Recent Activities</div>
+            <div style="overflow-y:auto;max-height:440px;display:flex;flex-direction:column;gap:8px;">
+                {% for log in recent_activities %}
+                <div style="border:1px solid var(--border);border-radius:4px;padding:12px;background:#FAFAFA;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                        <div>
+                            <span style="background:var(--unfpa-light);color:var(--unfpa-dark);font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:3px;">{{ log.partner }}</span>
+                            <span style="font-size:0.88rem;margin-left:8px;font-weight:600;">{{ log.activity_type }}</span>
+                        </div>
+                        <span style="font-size:0.75rem;color:var(--muted);">{{ log.activity_date }}</span>
+                    </div>
+                    <div style="font-size:0.8rem;color:var(--muted);margin-top:6px;">{{ log.district }}, {{ log.upazila }} · <span style="color:var(--unfpa-blue);font-weight:600;">{{ log.beneficiary_count }} beneficiaries</span></div>
+                </div>
+                {% empty %}
+                <div class="empty-state"><p>No activities logged yet.</p></div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ══ TRAINING ══ -->
+{% if can_enter_data %}
+<div id="s-training" class="section">
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px;">
+        <div class="card" style="padding:16px;border-top:3px solid #805AD5;"><div class="stat-num" style="color:#805AD5;">{{ total_training_sessions }}</div><div style="font-size:0.78rem;color:var(--muted);margin-top:4px;">Sessions Held</div></div>
+        <div class="card" style="padding:16px;border-top:3px solid var(--unfpa-blue);"><div class="stat-num" style="color:var(--unfpa-blue);">{{ total_participants }}</div><div style="font-size:0.78rem;color:var(--muted);margin-top:4px;">Total Participants</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div class="card" style="padding:24px;">
+            <div class="section-header">Log Training Session</div>
+            <form method="post" action="/training/add/">
+                {% csrf_token %}
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+                    <div><label>Partner</label>
+                        <select name="partner">
+                            {% if is_unfpa_admin %}
+                            <option value="CIPRB">CIPRB</option><option value="PHD">PHD</option><option value="Bondhu">Bondhu</option>
+                            {% else %}
+                            <option value="{{ user_org }}" selected>{{ user_org }}</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div><label>Date</label><input type="date" name="session_date" required></div>
+                    <div><label>District</label><input type="text" name="district" placeholder="e.g. Dhaka" required></div>
+                    <div><label>Topic</label><input type="text" name="topic" placeholder="e.g. KoboToolbox" required></div>
+                    <div><label>Trainer</label><input type="text" name="trainer_name" placeholder="Full name" required></div>
+                    <div><label>Participants</label><input type="number" name="participants_count" value="0" min="0"></div>
+                    <div style="grid-column:span 2;"><label>Competency Level</label><select name="competency_level"><option value="BEGINNER">Beginner</option><option value="DEVELOPING">Developing</option><option value="PROFICIENT">Proficient</option><option value="EXPERT">Expert</option></select></div>
+                    <div style="grid-column:span 2;"><label>Notes</label><textarea name="notes" rows="2" placeholder="Optional"></textarea></div>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Session</button>
+            </form>
+        </div>
+        <div class="card" style="padding:24px;">
+            <div class="section-header">Training Log</div>
+            <div style="overflow-y:auto;max-height:420px;">
+                <table>
+                    <thead><tr><th>Partner</th><th>Topic</th><th>Date</th><th>Participants</th><th>Level</th></tr></thead>
+                    <tbody>
+                    {% for s in training_sessions %}
+                    <tr>
+                        <td><span style="background:var(--unfpa-light);color:var(--unfpa-dark);font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:3px;">{{ s.partner }}</span></td>
+                        <td style="font-size:0.85rem;">{{ s.topic|truncatechars:28 }}</td>
+                        <td style="font-size:0.78rem;color:var(--muted);">{{ s.session_date }}</td>
+                        <td style="font-weight:600;">{{ s.participants_count }}</td>
+                        <td><span class="badge badge-f">{{ s.competency_level }}</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5"><div class="empty-state"><p>No sessions logged yet.</p></div></td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ══ REPORTS ══ -->
+<div id="s-reports" class="section">
+    <div class="section-header">Report Generation</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+        <div class="card" style="padding:24px;display:flex;flex-direction:column;gap:12px;border-top:3px solid var(--unfpa-blue);">
+            <div style="font-weight:700;color:var(--unfpa-dark);font-size:1rem;">AI Policy Newsletter</div>
+            <div style="font-size:0.85rem;color:var(--muted);">Generate a policy advocacy newsletter from live programme data using Gemini AI.</div>
+            <a href="/reports/generate-newsletter/" class="btn btn-primary" style="align-self:flex-start;">Generate Now</a>
+        </div>
+        <div class="card" style="padding:24px;display:flex;flex-direction:column;gap:12px;border-top:3px solid var(--unfpa-teal);">
+            <div style="font-weight:700;color:var(--unfpa-dark);font-size:1rem;">One-Pager PDF</div>
+            <div style="font-size:0.85rem;color:var(--muted);">Download an infographic summary of fistula and MPDSR programme data.</div>
+            <a href="/reports/export/pdf/" class="btn btn-teal" style="align-self:flex-start;">Download PDF</a>
+        </div>
+        <div class="card" style="padding:24px;display:flex;flex-direction:column;gap:12px;border-top:3px solid var(--unfpa-dark);">
+            <div style="font-weight:700;color:var(--unfpa-dark);font-size:1rem;">PowerPoint Deck</div>
+            <div style="font-size:0.85rem;color:var(--muted);">Download a structured MPDSR and fistula review presentation for stakeholders.</div>
+            <a href="/reports/export/ppt/" class="btn btn-dark" style="align-self:flex-start;">Download PPT</a>
+        </div>
+    </div>
+    {% if kobo_baseline_url %}
+    <div class="card" style="margin-top:16px;padding:24px;border-top:3px solid #805AD5;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+            <div style="font-weight:700;color:var(--unfpa-dark);font-size:1rem;">Baseline Assessment</div>
+            <div style="font-size:0.85rem;color:var(--muted);margin-top:4px;">Collect baseline data to establish project benchmarks across all sites.</div>
+        </div>
+        <a href="{{ kobo_baseline_url }}" target="_blank" class="btn btn-primary">📋 Open Baseline Form</a>
+    </div>
+    {% endif %}
+</div>
+
+</main>
+
+<!-- Footer -->
+<footer style="background:var(--unfpa-dark);color:rgba(255,255,255,0.5);text-align:center;padding:12px;font-size:0.75rem;margin-top:40px;">
+    UNFPA Bangladesh · CIPRB M&amp;E Digital System · Confidential · {{ request.user.username }}
+</footer>
+
+<script>
+function show(name, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('s-' + name).classList.add('active');
+    if (btn) btn.classList.add('active');
+}
+
+Chart.defaults.color = '#718096';
+Chart.defaults.font.family = "'Source Sans 3', sans-serif";
+Chart.defaults.font.size = 11;
+
+new Chart(document.getElementById('c-ring'), {
+    type: 'doughnut',
+    data: { datasets: [{ data: [{{ fistula_operated }}, Math.max(0, {{ fistula_goal }} - {{ fistula_operated }})], backgroundColor: ['#009EDB','#E2E8F0'], borderWidth:0, cutout:'83%' }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ tooltip:{ enabled:false } } }
+});
+
+{% if total_mpdsr > 0 %}
+new Chart(document.getElementById('c-status'), {
+    type: 'doughnut',
+    data: { labels: ['Implemented','Pending','Stalled'], datasets: [{ data:[{{ implemented_mpdsr }},{{ pending_mpdsr }},{{ stalled_mpdsr }}], backgroundColor:['#38A169','#E53E3E','#A0AEC0'], borderWidth:2, borderColor:'white' }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:12 } } } }
+});
+new Chart(document.getElementById('c-district'), {
+    type: 'bar',
+    data: { labels: {{ heatmap_labels|safe }}, datasets:[{ label:'Deaths', data:{{ heatmap_data|safe }}, backgroundColor:'#009EDB', borderRadius:3 }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1 }, grid:{ color:'#EDF2F7' } }, x:{ grid:{ display:false } } } }
+});
+{% endif %}
+
+new Chart(document.getElementById('c-gauge'), {
+    type: 'doughnut',
+    data: { datasets:[{ data:[{{ action_gap_percent }}, Math.max(0, 100 - {{ action_gap_percent }})], backgroundColor:['#009EDB','#EDF2F7'], borderWidth:0, circumference:180, rotation:270, cutout:'78%' }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ tooltip:{ enabled:false } } }
+});
+
+const pL = {{ partner_labels|safe }};
+const pC = ['#009EDB','#00A19A','#805AD5'];
+
+if (document.getElementById('c-pact')) {
+    new Chart(document.getElementById('c-pact'), {
+        type:'bar', data:{ labels:pL, datasets:[{ data:{{ partner_activities|safe }}, backgroundColor:pC, borderRadius:4 }] },
+        options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, grid:{ color:'#EDF2F7' } }, x:{ grid:{ display:false } } } }
+    });
+    new Chart(document.getElementById('c-pben'), {
+        type:'bar', data:{ labels:pL, datasets:[{ data:{{ partner_beneficiaries|safe }}, backgroundColor:pC, borderRadius:4 }] },
+        options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, grid:{ color:'#EDF2F7' } }, x:{ grid:{ display:false } } } }
+    });
+}
+</script>
+</body>
+</html>
