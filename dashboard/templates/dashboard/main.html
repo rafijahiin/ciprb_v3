@@ -72,17 +72,14 @@
         .mob-grid-2 { grid-template-columns: repeat(2,1fr) !important; }
 
         @media (max-width: 768px) {
-            /* Header */
             header { height: auto !important; flex-direction: column !important; padding: 10px 16px !important; gap: 8px !important; }
             header > div:first-child span[style*="SRHR"] { display: none; }
             nav { flex-wrap: wrap !important; justify-content: center; gap: 2px !important; width: 100%; }
             .nav-btn { font-size: 0.72rem !important; padding: 5px 8px !important; }
             header > div:last-child { width: 100%; justify-content: center !important; gap: 8px !important; }
 
-            /* Main padding */
             main { padding: 12px !important; }
 
-            /* All fixed grids collapse */
             [style*="grid-template-columns:repeat(4,1fr)"],
             [style*="grid-template-columns:repeat(5,1fr)"],
             [style*="grid-template-columns:repeat(3,1fr)"] {
@@ -93,29 +90,22 @@
                 grid-template-columns: 1fr !important;
             }
 
-            /* Pipeline strip */
             .pip-step { padding: 8px 4px !important; }
             .pip-val { font-size: 1.4rem !important; }
 
-            /* Tables scroll horizontally */
             table { display: block; overflow-x: auto; white-space: nowrap; }
             th, td { padding: 8px 10px !important; font-size: 0.78rem !important; }
 
-            /* Stat numbers smaller */
             .stat-num { font-size: 1.6rem !important; }
 
-            /* Cards padding */
             .card { padding: 12px !important; }
 
-            /* Forms stack */
             [style*="grid-template-columns:1fr 1fr;gap"] { grid-template-columns: 1fr !important; }
 
-            /* Report cards */
             [style*="grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:16px"] { 
                 grid-template-columns: 1fr !important; 
             }
 
-            /* Section header spacing */
             .section-header { font-size: 0.65rem !important; }
         }
 
@@ -180,7 +170,7 @@
         <div class="section-header">⚠ Behind-Target Alerts</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:8px;">
             {% for a in alerts %}
-            <div class="card" style="padding:16px;" class="alert-{% if a.level == 'critical' %}c{% else %}w{% endif %}">
+            <div class="card alert-{% if a.level == 'critical' %}c{% else %}w{% endif %}" style="padding:16px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                     <div>
                         <div style="font-size:0.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;">{{ a.partner }}</div>
@@ -484,145 +474,29 @@
         <div class="card" style="padding:16px;border-top:3px solid #805AD5;"><div class="stat-num" style="color:#805AD5;">{{ total_training_sessions }}</div><div style="font-size:0.78rem;color:var(--muted);margin-top:4px;">Sessions Held</div></div>
         <div class="card" style="padding:16px;border-top:3px solid var(--unfpa-blue);"><div class="stat-num" style="color:var(--unfpa-blue);">{{ total_participants }}</div><div style="font-size:0.78rem;color:var(--muted);margin-top:4px;">Total Participants</div></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-        <div class="card" style="padding:24px;">
-            <div class="section-header">Log Training Session</div>
-            <form method="post" action="/training/add/">
-                {% csrf_token %}
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-                    <div><label>Partner</label>
-                        <select name="partner">
-                            {% if is_unfpa_admin %}
-                            <option value="CIPRB">CIPRB</option><option value="PHD">PHD</option><option value="Bondhu">Bondhu</option>
-                            {% else %}
-                            <option value="{{ user_org }}" selected>{{ user_org }}</option>
-                            {% endif %}
-                        </select>
-                    </div>
-                    <div><label>Date</label><input type="date" name="session_date" required></div>
-                    <div><label>District</label><input type="text" name="district" placeholder="e.g. Dhaka" required></div>
-                    <div><label>Topic</label><input type="text" name="topic" placeholder="e.g. KoboToolbox" required></div>
-                    <div><label>Trainer</label><input type="text" name="trainer_name" placeholder="Full name" required></div>
-                    <div><label>Participants</label><input type="number" name="participants_count" value="0" min="0"></div>
-                    <div style="grid-column:span 2;"><label>Competency Level</label><select name="competency_level"><option value="BEGINNER">Beginner</option><option value="DEVELOPING">Developing</option><option value="PROFICIENT">Proficient</option><option value="EXPERT">Expert</option></select></div>
-                    <div style="grid-column:span 2;"><label>Notes</label><textarea name="notes" rows="2" placeholder="Optional"></textarea></div>
-                </div>
-                <button type="submit" class="btn btn-primary">Save Session</button>
-            </form>
-        </div>
-        <div class="card" style="padding:24px;">
-            <div class="section-header">Training Log</div>
-            <div style="overflow-y:auto;max-height:420px;">
-                <table>
-                    <thead><tr><th>Partner</th><th>Topic</th><th>Date</th><th>Participants</th><th>Level</th></tr></thead>
-                    <tbody>
-                    {% for s in training_sessions %}
-                    <tr>
-                        <td><span style="background:var(--unfpa-light);color:var(--unfpa-dark);font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:3px;">{{ s.partner }}</span></td>
-                        <td style="font-size:0.85rem;">{{ s.topic|truncatechars:28 }}</td>
-                        <td style="font-size:0.78rem;color:var(--muted);">{{ s.session_date }}</td>
-                        <td style="font-weight:600;">{{ s.participants_count }}</td>
-                        <td><span class="badge badge-f">{{ s.competency_level }}</span></td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="5"><div class="empty-state"><p>No sessions logged yet.</p></div></td></tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 </div>
 {% endif %}
-
-<!-- ══ REPORTS ══ -->
-<div id="s-reports" class="section">
-    <div class="section-header">Report Generation</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
-        <div class="card" style="padding:24px;display:flex;flex-direction:column;gap:12px;border-top:3px solid var(--unfpa-blue);">
-            <div style="font-weight:700;color:var(--unfpa-dark);font-size:1rem;">AI Policy Newsletter</div>
-            <div style="font-size:0.85rem;color:var(--muted);">Generate a policy advocacy newsletter from live programme data using Gemini AI.</div>
-            <a href="/reports/generate-newsletter/" class="btn btn-primary" style="align-self:flex-start;">Generate Now</a>
-        </div>
-        <div class="card" style="padding:24px;display:flex;flex-direction:column;gap:12px;border-top:3px solid var(--unfpa-teal);">
-            <div style="font-weight:700;color:var(--unfpa-dark);font-size:1rem;">One-Pager PDF</div>
-            <div style="font-size:0.85rem;color:var(--muted);">Download an infographic summary of fistula and MPDSR programme data.</div>
-            <a href="/reports/export/pdf/" class="btn btn-teal" style="align-self:flex-start;">Download PDF</a>
-        </div>
-        <div class="card" style="padding:24px;display:flex;flex-direction:column;gap:12px;border-top:3px solid var(--unfpa-dark);">
-            <div style="font-weight:700;color:var(--unfpa-dark);font-size:1rem;">PowerPoint Deck</div>
-            <div style="font-size:0.85rem;color:var(--muted);">Download a structured MPDSR and fistula review presentation for stakeholders.</div>
-            <a href="/reports/export/ppt/" class="btn btn-dark" style="align-self:flex-start;">Download PPT</a>
-        </div>
-    </div>
-    {% if kobo_baseline_url %}
-    <div class="card" style="margin-top:16px;padding:24px;border-top:3px solid #805AD5;display:flex;justify-content:space-between;align-items:center;">
-        <div>
-            <div style="font-weight:700;color:var(--unfpa-dark);font-size:1rem;">Baseline Assessment</div>
-            <div style="font-size:0.85rem;color:var(--muted);margin-top:4px;">Collect baseline data to establish project benchmarks across all sites.</div>
-        </div>
-        <a href="{{ kobo_baseline_url }}" target="_blank" class="btn btn-primary">📋 Open Baseline Form</a>
-    </div>
-    {% endif %}
-</div>
 
 </main>
 
-<!-- Footer -->
-<footer style="background:var(--unfpa-dark);color:rgba(255,255,255,0.5);text-align:center;padding:12px;font-size:0.75rem;margin-top:40px;">
-    UNFPA Bangladesh · CIPRB M&amp;E Digital System · Confidential · {{ request.user.username }}
-</footer>
-
 <script>
-function show(name, btn) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('s-' + name).classList.add('active');
-    if (btn) btn.classList.add('active');
-}
+    // Ping the server every 10 minutes to prevent Render spin-down
+    setInterval(() => fetch('/accounts/login/'), 600000);
 
-Chart.defaults.color = '#718096';
-Chart.defaults.font.family = "'Source Sans 3', sans-serif";
-Chart.defaults.font.size = 11;
-
-new Chart(document.getElementById('c-ring'), {
-    type: 'doughnut',
-    data: { datasets: [{ data: [{{ fistula_operated }}, Math.max(0, {{ fistula_goal }} - {{ fistula_operated }})], backgroundColor: ['#009EDB','#E2E8F0'], borderWidth:0, cutout:'83%' }] },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{ tooltip:{ enabled:false } } }
-});
-
-{% if total_mpdsr > 0 %}
-new Chart(document.getElementById('c-status'), {
-    type: 'doughnut',
-    data: { labels: ['Implemented','Pending','Stalled'], datasets: [{ data:[{{ implemented_mpdsr }},{{ pending_mpdsr }},{{ stalled_mpdsr }}], backgroundColor:['#38A169','#E53E3E','#A0AEC0'], borderWidth:2, borderColor:'white' }] },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:12 } } } }
-});
-new Chart(document.getElementById('c-district'), {
-    type: 'bar',
-    data: { labels: {{ heatmap_labels|safe }}, datasets:[{ label:'Deaths', data:{{ heatmap_data|safe }}, backgroundColor:'#009EDB', borderRadius:3 }] },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1 }, grid:{ color:'#EDF2F7' } }, x:{ grid:{ display:false } } } }
-});
-{% endif %}
-
-new Chart(document.getElementById('c-gauge'), {
-    type: 'doughnut',
-    data: { datasets:[{ data:[{{ action_gap_percent }}, Math.max(0, 100 - {{ action_gap_percent }})], backgroundColor:['#009EDB','#EDF2F7'], borderWidth:0, circumference:180, rotation:270, cutout:'78%' }] },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{ tooltip:{ enabled:false } } }
-});
-
-const pL = {{ partner_labels|safe }};
-const pC = ['#009EDB','#00A19A','#805AD5'];
-
-if (document.getElementById('c-pact')) {
-    new Chart(document.getElementById('c-pact'), {
-        type:'bar', data:{ labels:pL, datasets:[{ data:{{ partner_activities|safe }}, backgroundColor:pC, borderRadius:4 }] },
-        options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, grid:{ color:'#EDF2F7' } }, x:{ grid:{ display:false } } } }
-    });
-    new Chart(document.getElementById('c-pben'), {
-        type:'bar', data:{ labels:pL, datasets:[{ data:{{ partner_beneficiaries|safe }}, backgroundColor:pC, borderRadius:4 }] },
-        options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, grid:{ color:'#EDF2F7' } }, x:{ grid:{ display:false } } } }
-    });
-}
+    // Simple navigation display logic
+    function show(sectionId, btn) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('s-' + sectionId).classList.add('active');
+        
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Close mobile nav on click
+        if(window.innerWidth <= 640) {
+            document.getElementById('mob-nav').classList.remove('mob-open');
+        }
+    }
 </script>
+
 </body>
 </html>
