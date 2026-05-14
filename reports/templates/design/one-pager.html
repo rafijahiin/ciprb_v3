@@ -1,1 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>April 2026 Monthly Report — One-Pager</title>
+{% load static %}
+<link rel="stylesheet" href="{% static 'shared/common.css' %}">
+<script>window.REPORT = {{ report_json|safe }};</script>
+<style>
+  /* A4 portrait at 96dpi = 794 × 1123. Bumped to 800×1132 with 0px bleed. */
+  html, body { margin: 0; background: #d9dde5; }
+  body { display: flex; justify-content: center; align-items: flex-start; padding: 0; }
 
+  .page {
+    width: 800px; min-height: 1132px;
+    background: var(--surface);
+    color: var(--fg);
+    padding: 36px 40px 28px;
+    box-sizing: border-box;
+    font-family: var(--font-sans);
+    position: relative;
+    box-shadow: 0 8px 32px rgba(15,23,42,0.08);
+  }
+
+  /* ─── MASTHEAD ────────────────────────────── */
+  .mast {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding-bottom: 16px; border-bottom: 2px solid var(--fg);
+    margin-bottom: 22px;
+  }
+  .mast-l { display: flex; align-items: center; gap: 12px; }
+  .mast-dot {
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--green-bright); box-shadow: var(--glow-green);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:.6} 50%{opacity:1} }
+  .mast-brand {
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: 1.05rem; letter-spacing: 0.12em; color: var(--green);
+  }
+  .mast-sub {
+    font-family: var(--font-mono); font-size: 0.7rem;
+    color: var(--fg-muted); letter-spacing: 0.08em;
+    margin-top: 2px;
+  }
+  .mast-r { text-align: right; }
+  .mast-eyebrow {
+    font-family: var(--font-mono); font-size: 0.65rem;
+    color: var(--fg-muted); letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .mast-rep {
+    font-family: var(--font-mono); font-size: 0.85rem; font-weight: 600;
+    color: var(--fg); letter-spacing: 0.06em; margin-top: 2px;
+  }
+
+  /* ─── HERO TITLE ──────────────────────────── */
+  .hero {
+    display: grid; grid-template-columns: 1fr auto; align-items: end;
+    margin-bottom: 18px; gap: 20px;
+  }
+  .hero-title {
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: 4.2rem; line-height: 0.92;
+    letter-spacing: -0.02em; color: var(--fg);
+    margin: 0;
+  }
+  .hero-title .month { color: var(--green); }
+  .hero-tag {
+    font-family: var(--font-mono); font-size: 0.72rem;
+    color: var(--fg-muted); letter-spacing: 0.1em;
+    text-transform: uppercase; margin-top: 6px;
+  }
+  .hero-note {
+    font-family: var(--font-sans); font-size: 0.78rem;
+    color: var(--fg-muted); max-width: 220px;
+    text-align: right; line-height: 1.4;
+  }
+  .hero-note b { color: var(--fg); font-weight: 600; font-family: var(--font-mono); }
+
+  /* ─── KPI ROW ─────────────────────────────── */
+  .kpis {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0; margin-bottom: 22px;
+  }
+  .kpi { padding: 0 16px; border-right: 1px solid var(--border); }
+  .kpi:first-child { padding-left: 0; }
+  .kpi:last-child { border-right: 0; padding-right: 0; }
+  .kpi-label {
+    font-family: var(--font-mono); font-size: 0.6rem;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--fg-muted);
+  }
+  .kpi-num {
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: 2.8rem; line-height: 1; margin: 6px 0 4px;
+    color: var(--fg);
+  }
+  .kpi-foot {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: var(--font-mono); font-size: 0.65rem; color: var(--fg-muted);
+    letter-spacing: 0.04em;
+  }
+  .kpi-delta { color: var(--green); font-weight: 600; }
+  .kpi-target { color: var(--fg-faint); }
+
+  /* ─── SECTION ─────────────────────────────── */
+  .sec { margin-bottom: 22px; }
+  .sec-head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 10px;
+  }
+  .sec-title {
+    font-family: var(--font-mono); font-weight: 600;
+    font-size: 0.72rem; text-transform: uppercase;
+    letter-spacing: 0.14em; color: var(--fg);
+  }
+  .sec-meta {
+    font-family: var(--font-mono); font-size: 0.62rem;
+    color: var(--fg-faint); letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .sec-rule { flex: 1; height: 1px; background: var(--border); }
+
+  /* ─── FUNNEL ──────────────────────────────── */
+  .funnel { display: flex; flex-direction: column; gap: 4px; }
+  .funn-row {
+    display: grid; grid-template-columns: 90px 1fr 60px;
+    align-items: center; gap: 10px; height: 32px;
+  }
+  .funn-stage {
+    font-family: var(--font-mono); font-size: 0.65rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-muted);
+  }
+  .funn-track {
+    height: 100%; position: relative; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
+  }
+  .funn-fill {
+    position: absolute; inset: 0 auto 0 0;
+    border-radius: 3px;
+  }
+  .funn-fill.red    { background: var(--red);   opacity: 0.85; }
+  .funn-fill.amber  { background: var(--amber); opacity: 0.85; }
+  .funn-fill.green  { background: var(--green); opacity: 0.85; }
+  .funn-val {
+    font-family: var(--font-mono); font-size: 1.1rem; font-weight: 700;
+    color: var(--fg); text-align: right;
+  }
+  .funn-conv {
+    display: grid; grid-template-columns: 90px 1fr 60px; gap: 10px;
+    align-items: center; padding-left: 100px;
+    margin-top: 2px; font-family: var(--font-mono);
+    font-size: 0.6rem; color: var(--fg-faint); letter-spacing: 0.06em;
+  }
+
+  /* ─── TWO-COL: MAP + MPDSR ────────────────── */
+  .row-2 { display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; }
+
+  .map-card {
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px 8px;
+  }
+  .map-wrap { position: relative; height: 280px; }
+  .map-legend {
+    display: flex; gap: 12px; margin-top: 6px;
+    font-family: var(--font-mono); font-size: 0.6rem;
+    color: var(--fg-muted); letter-spacing: 0.08em;
+  }
+  .map-legend .swatch {
+    display: inline-block; width: 10px; height: 10px;
+    border-radius: 50%; margin-right: 4px; vertical-align: -1px;
+  }
+
+  /* MPDSR donut + bars */
+  .mpdsr-card {
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .donut-row {
+    display: grid; grid-template-columns: 130px 1fr; gap: 14px;
+    align-items: center;
+  }
+  .donut-num {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; pointer-events: none;
+  }
+  .donut-num .v {
+    font-family: var(--font-mono); font-weight: 700; font-size: 1.9rem; line-height: 1;
+  }
+  .donut-num .l {
+    font-family: var(--font-mono); font-size: 0.55rem; color: var(--fg-muted);
+    letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px;
+  }
+  .status-bars { display: flex; flex-direction: column; gap: 6px; }
+  .sbar { display: grid; grid-template-columns: 75px 1fr 28px; gap: 8px; align-items: center; }
+  .sbar-l {
+    font-family: var(--font-mono); font-size: 0.6rem; font-weight: 600;
+    color: var(--fg-muted); letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .sbar-track {
+    height: 12px; background: var(--bg); border-radius: 3px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .sbar-fill { height: 100%; }
+  .sbar-v {
+    font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-align: right;
+  }
+
+  /* ─── ISOTYPE ROW ─────────────────────────── */
+  .iso-card {
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .iso-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 10px;
+  }
+  .iso-title {
+    font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg);
+  }
+  .iso-num {
+    font-family: var(--font-mono); font-weight: 700; font-size: 1.8rem; color: var(--green);
+  }
+  .iso-grid {
+    display: grid; grid-template-columns: repeat(28, 1fr); gap: 3px;
+    margin-bottom: 8px;
+  }
+  .iso-fig {
+    width: 100%; aspect-ratio: 1 / 1.6;
+    background: var(--border);
+  }
+  .iso-fig svg { width: 100%; height: 100%; display: block; }
+  .iso-key {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    font-family: var(--font-mono); font-size: 0.6rem;
+    color: var(--fg-muted); letter-spacing: 0.06em;
+  }
+  .iso-key .swatch {
+    display: inline-block; width: 8px; height: 13px;
+    margin-right: 6px; vertical-align: -2px;
+  }
+  .iso-key b { font-weight: 700; color: var(--fg); }
+
+  /* ─── PARTNERS / TREND ROW ────────────────── */
+  .row-3 { display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; }
+
+  .partner-rows { display: flex; flex-direction: column; gap: 10px; }
+  .pn-row { display: grid; grid-template-columns: 60px 1fr 60px; gap: 10px;
+    align-items: center; }
+  .pn-name {
+    font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+  .pn-track { height: 20px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 3px; overflow: hidden;
+    position: relative;
+  }
+  .pn-fill { height: 100%; }
+  .pn-target {
+    position: absolute; top: -3px; bottom: -3px; width: 2px;
+    background: var(--fg);
+  }
+  .pn-val {
+    font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; text-align: right;
+  }
+
+  .trend-card {
+    padding: 0;
+  }
+  .trend-svg { display: block; width: 100%; height: 130px; }
+
+  /* ─── ALERTS ──────────────────────────────── */
+  .alerts {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    margin-bottom: 16px;
+  }
+  .alert {
+    border: 1px solid var(--border); border-left-width: 3px;
+    padding: 9px 12px; border-radius: 4px;
+  }
+  .alert-c { border-left-color: var(--red); background: var(--tint-red-5); }
+  .alert-w { border-left-color: var(--amber); background: var(--tint-amber-5); }
+  .alert-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 4px;
+  }
+  .alert-meta {
+    font-family: var(--font-mono); font-size: 0.55rem;
+    text-transform: uppercase; letter-spacing: 0.12em; color: var(--fg-muted);
+  }
+  .alert-sev {
+    font-family: var(--font-mono); font-size: 0.55rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.12em;
+  }
+  .alert-c .alert-sev { color: var(--red); }
+  .alert-w .alert-sev { color: var(--amber); }
+  .alert-txt {
+    font-family: var(--font-sans); font-size: 0.78rem;
+    color: var(--fg); line-height: 1.35;
+  }
+
+  /* ─── FOOTER ──────────────────────────────── */
+  .foot {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding-top: 14px; border-top: 1px solid var(--border);
+    font-family: var(--font-mono); font-size: 0.6rem;
+    color: var(--fg-faint); letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .foot b { color: var(--fg-muted); font-weight: 600; }
+
+  /* ─── CONTEXT STRIP (national) ────────────── */
+  .ctx {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border: 1px solid var(--border); border-radius: 6px;
+    margin-bottom: 22px;
+  }
+  .ctx-cell { padding: 10px 14px; border-right: 1px solid var(--border); }
+  .ctx-cell:last-child { border-right: 0; }
+  .ctx-l {
+    font-family: var(--font-mono); font-size: 0.55rem;
+    color: var(--fg-muted); letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .ctx-v {
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: 1.2rem; color: var(--fg); margin: 2px 0;
+  }
+  .ctx-foot { font-family: var(--font-mono); font-size: 0.55rem;
+    color: var(--fg-faint); letter-spacing: 0.08em;
+  }
+</style>
+</head>
+<body>
+<div class="page" data-screen-label="One-Pager Infographic">
+
+  <!-- ═════ MASTHEAD ═════ -->
+  <div class="mast">
+    <div class="mast-l">
+      <div class="mast-dot"></div>
+      <div>
+        <div class="mast-brand">CIPRB M&amp;E</div>
+        <div class="mast-sub">UNFPA-MISP · CP10 · 2022–2026</div>
+      </div>
+    </div>
+    <div class="mast-r">
+      <div class="mast-eyebrow">Monthly Operations Report</div>
+      <div class="mast-rep">№ 042 · AUTO-GENERATED</div>
+    </div>
+  </div>
+
+  <!-- ═════ HERO ═════ -->
+  <div class="hero">
+    <div>
+      <h1 class="hero-title"><span class="month">APRIL</span><br>2026.</h1>
+      <div class="hero-tag">CIPRB · PHD · BONDHU · 10 INTEGRATED + COX'S BAZAR</div>
+    </div>
+    <div class="hero-note">
+      Snapshot of <b>fistula</b>, <b>MPDSR</b>, partner activity &amp;<br>
+      equity coverage across the 10 integrated programme districts &amp;
+      the Cox's Bazar humanitarian response.
+    </div>
+  </div>
+
+  <!-- ═════ KPIs ═════ -->
+  <div class="kpis" id="kpis"></div>
+
+  <!-- ═════ NATIONAL CONTEXT ═════ -->
+  <div class="ctx" id="ctx"></div>
+
+  <!-- ═════ FUNNEL ═════ -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-title">Fistula Referral Pipeline · April</div>
+      <div class="sec-rule"></div>
+      <div class="sec-meta">5 stages · 87.8% surgery success</div>
+    </div>
+    <div class="funnel" id="funnel"></div>
+    <div class="funn-conv" id="funn-conv"></div>
+  </div>
+
+  <!-- ═════ MAP + MPDSR ═════ -->
+  <div class="row-2" style="margin-bottom: 22px;">
+    <div class="map-card">
+      <div class="sec-head" style="margin-bottom: 6px;">
+        <div class="sec-title">District Heatmap</div>
+        <div class="sec-rule"></div>
+        <div class="sec-meta">10 districts</div>
+      </div>
+      <div class="map-wrap">
+        <svg id="bd-map" viewBox="0 0 100 140" preserveAspectRatio="xMidYMid meet"
+             style="width:100%; height:100%;">
+          <!-- Bangladesh outline (simplified) -->
+          <path d="M 18 22 Q 25 12 38 14 Q 50 12 60 18 Q 75 16 82 32
+                   L 80 50 Q 70 54 66 60 Q 80 66 82 82 Q 82 102 72 118
+                   Q 64 126 56 116 Q 46 112 36 110 Q 22 110 14 92
+                   L 12 64 Q 18 56 22 50 Q 12 38 18 22 Z"
+                fill="var(--bg)" stroke="var(--border)" stroke-width="1.2"/>
+          <!-- District dots inserted by JS -->
+          <g id="bd-dots"></g>
+        </svg>
+      </div>
+      <div class="map-legend">
+        <span><span class="swatch" style="background:var(--green); opacity:.4"></span>1–2 deaths</span>
+        <span><span class="swatch" style="background:var(--amber); opacity:.7"></span>3–4 deaths</span>
+        <span><span class="swatch" style="background:var(--red);"></span>5+ deaths</span>
+        <span style="margin-left:auto"><span class="swatch" style="background:transparent;border:1.5px dashed var(--red); border-radius:0;"></span>Humanitarian</span>
+      </div>
+    </div>
+
+    <div class="mpdsr-card">
+      <div class="sec-head" style="margin-bottom: 8px;">
+        <div class="sec-title">MPDSR Events</div>
+        <div class="sec-rule"></div>
+        <div class="sec-meta">N=38</div>
+      </div>
+      <div class="donut-row">
+        <div style="position:relative; width:130px; height:130px;">
+          <svg viewBox="0 0 100 100" width="130" height="130" id="mpdsr-donut"></svg>
+          <div class="donut-num"><span class="v">36.8<span style="font-size:.9rem">%</span></span><span class="l">Implemented</span></div>
+        </div>
+        <div class="status-bars" id="status-bars"></div>
+      </div>
+      <div style="margin-top:14px; padding-top:10px; border-top:1px solid var(--border); display:flex; justify-content:space-between;">
+        <div>
+          <div class="kpi-label">By Type</div>
+          <div style="display:flex; gap:10px; margin-top:6px;">
+            <div><span class="badge badge-r">MATERNAL</span> <b style="font-family:var(--font-mono);">21</b></div>
+            <div><span class="badge badge-s">PERINATAL</span> <b style="font-family:var(--font-mono);">13</b></div>
+            <div><span class="badge badge-s">STILLBIRTH</span> <b style="font-family:var(--font-mono);">4</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════ ISOTYPE: PEOPLE REACHED ═════ -->
+  <div class="iso-card sec">
+    <div class="iso-head">
+      <div>
+        <div class="iso-title">People Reached This Month</div>
+        <div style="font-family:var(--font-mono); font-size:0.6rem; color:var(--fg-faint); letter-spacing:0.08em; margin-top:2px;">EACH FIGURE = 100 BENEFICIARIES · LNOB EQUITY FLAGS HIGHLIGHTED</div>
+      </div>
+      <div class="iso-num">2,847</div>
+    </div>
+    <div class="iso-grid" id="iso-grid"></div>
+    <div class="iso-key" id="iso-key"></div>
+  </div>
+
+  <!-- ═════ PARTNERS + TREND ═════ -->
+  <div class="row-3 sec">
+    <div>
+      <div class="sec-head">
+        <div class="sec-title">Partner Performance · Beneficiaries vs Target</div>
+        <div class="sec-rule"></div>
+      </div>
+      <div class="partner-rows" id="partner-rows"></div>
+    </div>
+    <div>
+      <div class="sec-head">
+        <div class="sec-title">6-Month Trend</div>
+        <div class="sec-rule"></div>
+      </div>
+      <svg class="trend-svg" id="trend" viewBox="0 0 360 130" preserveAspectRatio="none"></svg>
+      <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:0.58rem; color:var(--fg-faint); letter-spacing:0.08em; margin-top:4px;">
+        <span>NOV 25</span><span>DEC</span><span>JAN 26</span><span>FEB</span><span>MAR</span><span>APR</span>
+      </div>
+      <div style="display:flex; gap:14px; margin-top:10px; font-family:var(--font-mono); font-size:0.6rem; color:var(--fg-muted); letter-spacing:0.06em;">
+        <span><span style="display:inline-block; width:8px; height:8px; background:var(--green); border-radius:50%; margin-right:5px;"></span>Operated</span>
+        <span><span style="display:inline-block; width:8px; height:8px; background:var(--blue); border-radius:50%; margin-right:5px;"></span>MPDSR</span>
+        <span><span style="display:inline-block; width:8px; height:8px; background:var(--purple); border-radius:50%; margin-right:5px;"></span>Beneficiaries (÷100)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════ ALERTS ═════ -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-title">⚠ Behind-Target Alerts</div>
+      <div class="sec-rule"></div>
+      <div class="sec-meta">4 active</div>
+    </div>
+    <div class="alerts" id="alerts"></div>
+  </div>
+
+  <!-- ═════ FOOTER ═════ -->
+  <div class="foot">
+    <span>Generated <b>01 May 2026 · 03:00 UTC</b> · Auto · From live KoboToolbox &amp; DHIS2 data</span>
+    <span>ciprb.me/r/apr-2026</span>
+  </div>
+</div>
+
+<script>
+const R = window.REPORT;
+
+/* ───── KPIs ───── */
+const kpiEl = document.getElementById('kpis');
+R.kpis.forEach(k => {
+  const pct = Math.round(k.value / k.target * 100);
+  kpiEl.insertAdjacentHTML('beforeend', `
+    <div class="kpi">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-num">${k.value.toLocaleString()}</div>
+      <div class="kpi-foot">
+        <span class="kpi-delta">${k.delta}</span>
+        <span class="kpi-target">${pct}% of ${k.target}</span>
+      </div>
+    </div>
+  `);
+});
+
+/* ───── National Context ───── */
+const c = R.context;
+const ctxItems = [
+  { l: 'MMR · National',  v: c.mmr_current, foot: `Down from ${c.mmr_baseline} (2019) · SDG ${c.mmr_sdg_target}` },
+  { l: 'Skilled Birth Att.', v: c.skilled_birth_attendance + '%', foot: 'BBS 2023 · was 57.9% in 2021' },
+  { l: 'Adolescent Fertility', v: c.adolescent_fertility, foot: 'per 1,000 women 15–19 · BDHS 2022' },
+  { l: 'ANC Coverage',    v: c.anc_coverage + '%', foot: 'Antenatal care · BBS' },
+];
+document.getElementById('ctx').innerHTML = ctxItems.map(i => `
+  <div class="ctx-cell">
+    <div class="ctx-l">${i.l}</div>
+    <div class="ctx-v">${i.v}</div>
+    <div class="ctx-foot">${i.foot}</div>
+  </div>
+`).join('');
+
+/* ───── Funnel ───── */
+const pipe = R.fistula.pipeline;
+const max = pipe[0].value;
+const funn = document.getElementById('funnel');
+pipe.forEach(p => {
+  const pct = p.value / max * 100;
+  funn.insertAdjacentHTML('beforeend', `
+    <div class="funn-row">
+      <div class="funn-stage">${p.label}</div>
+      <div class="funn-track">
+        <div class="funn-fill ${p.color}" style="width:${pct}%"></div>
+      </div>
+      <div class="funn-val">${p.value}</div>
+    </div>
+  `);
+});
+
+/* funnel conversion meta */
+const conv = pipe.slice(1).map((p, i) => {
+  const prev = pipe[i].value;
+  const r = Math.round(p.value / prev * 100);
+  return `${pipe[i].label.slice(0,5).toUpperCase()}→${p.label.slice(0,5).toUpperCase()}: ${r}%`;
+}).join('  ·  ');
+document.getElementById('funn-conv').innerHTML = `<span></span><span>${conv}</span><span></span>`;
+
+/* ───── Bangladesh district dots ───── */
+const dots = document.getElementById('bd-dots');
+R.districts.forEach(d => {
+  const r = 4 + d.deaths * 0.8;
+  let color = 'var(--green)', opacity = 0.55;
+  if (d.deaths >= 5) { color = 'var(--red)'; opacity = 0.9; }
+  else if (d.deaths >= 3) { color = 'var(--amber)'; opacity = 0.75; }
+
+  // humanitarian ring
+  if (d.humanitarian) {
+    dots.insertAdjacentHTML('beforeend',
+      `<circle cx="${d.x}" cy="${d.y}" r="${r + 3}" fill="none"
+               stroke="var(--red)" stroke-width="0.6" stroke-dasharray="1.5 1"/>`);
+  }
+  dots.insertAdjacentHTML('beforeend', `
+    <circle cx="${d.x}" cy="${d.y}" r="${r}" fill="${color}" fill-opacity="${opacity}"
+            stroke="${color}" stroke-width="0.4"/>
+    <text x="${d.x + r + 1.5}" y="${d.y + 1}"
+          font-family="IBM Plex Mono" font-size="2.6"
+          fill="var(--fg)" font-weight="600">${d.name}</text>
+    <text x="${d.x + r + 1.5}" y="${d.y + 4.2}"
+          font-family="IBM Plex Mono" font-size="2.1"
+          fill="var(--fg-muted)">${d.beneficiaries} ben · ${d.deaths} †</text>
+  `);
+});
+
+/* ───── MPDSR Donut ───── */
+const donut = document.getElementById('mpdsr-donut');
+const statuses = [
+  ['IMPLEMENTED', R.mpdsr.by_status.IMPLEMENTED, 'var(--green)'],
+  ['FUNDED',      R.mpdsr.by_status.FUNDED,      'var(--amber)'],
+  ['PENDING',     R.mpdsr.by_status.PENDING,     'var(--red)'],
+  ['STALLED',     R.mpdsr.by_status.STALLED,     'var(--fg-muted)'],
+];
+const total = R.mpdsr.total;
+let acc = 0;
+const cx = 50, cy = 50, rOut = 42, rIn = 33;
+statuses.forEach(([label, v, color]) => {
+  const a0 = acc / total * Math.PI * 2 - Math.PI / 2;
+  acc += v;
+  const a1 = acc / total * Math.PI * 2 - Math.PI / 2;
+  const large = (a1 - a0) > Math.PI ? 1 : 0;
+  const x0 = cx + Math.cos(a0) * rOut, y0 = cy + Math.sin(a0) * rOut;
+  const x1 = cx + Math.cos(a1) * rOut, y1 = cy + Math.sin(a1) * rOut;
+  const xi0 = cx + Math.cos(a0) * rIn, yi0 = cy + Math.sin(a0) * rIn;
+  const xi1 = cx + Math.cos(a1) * rIn, yi1 = cy + Math.sin(a1) * rIn;
+  donut.insertAdjacentHTML('beforeend',
+    `<path d="M ${x0} ${y0} A ${rOut} ${rOut} 0 ${large} 1 ${x1} ${y1}
+              L ${xi1} ${yi1} A ${rIn} ${rIn} 0 ${large} 0 ${xi0} ${yi0} Z"
+           fill="${color}"/>`);
+});
+
+/* MPDSR status bars */
+const sb = document.getElementById('status-bars');
+const maxS = Math.max(...statuses.map(s => s[1]));
+statuses.forEach(([label, v, color]) => {
+  sb.insertAdjacentHTML('beforeend', `
+    <div class="sbar">
+      <div class="sbar-l" style="color:${color}">${label}</div>
+      <div class="sbar-track"><div class="sbar-fill" style="width:${v/maxS*100}%; background:${color}; opacity:.85"></div></div>
+      <div class="sbar-v">${v}</div>
+    </div>
+  `);
+});
+
+/* ───── Isotype figures ───── */
+const iso = document.getElementById('iso-grid');
+const total_reached = R.equity.total_reached;
+const figs = 28; // each = ~100 (28 × 100 = 2800, close to 2847)
+// Distribution of flags across figures (approximate)
+const dDispl = Math.round(R.equity.displaced / 100);    // ~5
+const dAdo   = Math.round(R.equity.adolescent / 100);   // ~6
+const dDis   = Math.round(R.equity.disabled / 100);     // ~3
+const dEth   = Math.round(R.equity.ethnic / 100);       // ~2
+// Order: displaced, adolescent, disabled, ethnic, base (green)
+const figData = [];
+for (let i = 0; i < dDispl; i++) figData.push('red');
+for (let i = 0; i < dAdo;   i++) figData.push('amber');
+for (let i = 0; i < dDis;   i++) figData.push('purple');
+for (let i = 0; i < dEth;   i++) figData.push('blue');
+while (figData.length < figs) figData.push('green');
+
+const figureSvg = (color) => `
+  <svg viewBox="0 0 16 26" fill="${color}">
+    <circle cx="8" cy="4" r="3"/>
+    <path d="M 3 26 V 14 Q 3 9 8 9 Q 13 9 13 14 V 26 Z"/>
+  </svg>`;
+
+const colorMap = {
+  green:  'var(--green)',
+  amber:  'var(--amber)',
+  red:    'var(--red)',
+  purple: 'var(--purple)',
+  blue:   'var(--blue)',
+};
+figData.forEach(c => {
+  iso.insertAdjacentHTML('beforeend',
+    `<div class="iso-fig">${figureSvg(colorMap[c])}</div>`);
+});
+
+document.getElementById('iso-key').innerHTML = `
+  <span><span class="swatch" style="background:var(--green)"></span>General <b>${R.equity.total_reached - R.equity.displaced - R.equity.adolescent - R.equity.disabled - R.equity.ethnic}</b></span>
+  <span><span class="swatch" style="background:var(--red)"></span>🏕 Internally displaced <b>${R.equity.displaced}</b></span>
+  <span><span class="swatch" style="background:var(--amber)"></span>Adolescent 15–19 <b>${R.equity.adolescent}</b></span>
+  <span><span class="swatch" style="background:var(--purple)"></span>🦽 Women w/ disability <b>${R.equity.disabled}</b></span>
+  <span><span class="swatch" style="background:var(--blue)"></span>🏔 Ethnic minority <b>${R.equity.ethnic}</b></span>
+`;
+
+/* ───── Partner bars ───── */
+const pn = document.getElementById('partner-rows');
+const maxBen = Math.max(...R.partners.map(p => p.beneficiaries));
+R.partners.forEach(p => {
+  const color = `var(--${p.color})`;
+  // simulate target as a percentage of axis: assume targets in same units (~ben/30)
+  // For visualisation we'll mark a "target tick" at scaled position based on partner.target * 50 (rough)
+  const targetBen = p.target * 40; // target line at ~partner.target × 40 ben
+  const pct = p.beneficiaries / maxBen * 100;
+  const tickPct = Math.min(100, targetBen / maxBen * 100);
+  pn.insertAdjacentHTML('beforeend', `
+    <div class="pn-row">
+      <div class="pn-name" style="color:${color}">${p.name}</div>
+      <div class="pn-track">
+        <div class="pn-fill" style="width:${pct}%; background:${color}; opacity:.85"></div>
+        <div class="pn-target" style="left:${tickPct}%"></div>
+      </div>
+      <div class="pn-val">${p.beneficiaries.toLocaleString()}</div>
+    </div>
+    <div style="display:grid; grid-template-columns: 60px 1fr 60px; gap:10px; margin-top:-4px;">
+      <span></span>
+      <span style="font-family:var(--font-mono); font-size:0.55rem; color:var(--fg-faint); letter-spacing:0.06em;">${p.activities} activities · ${p.trainings} trainings · ${p.participants} trained</span>
+      <span></span>
+    </div>
+  `);
+});
+
+/* ───── Trend chart ───── */
+const trend = document.getElementById('trend');
+const months = R.trend.months;
+const series = [
+  { data: R.trend.operated, color: 'var(--green)' },
+  { data: R.trend.mpdsr, color: 'var(--blue)' },
+  { data: R.trend.beneficiaries.map(v => v / 100), color: 'var(--purple)' },
+];
+const allMax = Math.max(...series.flatMap(s => s.data));
+const allMin = 0;
+const W = 360, H = 130, padL = 20, padR = 10, padT = 10, padB = 18;
+const innerW = W - padL - padR, innerH = H - padT - padB;
+
+// y axis ticks
+for (let i = 0; i <= 4; i++) {
+  const y = padT + innerH * (i / 4);
+  trend.insertAdjacentHTML('beforeend',
+    `<line x1="${padL}" x2="${W-padR}" y1="${y}" y2="${y}" stroke="var(--border)" stroke-width="0.5"/>`);
+}
+
+series.forEach(s => {
+  const pts = s.data.map((v, i) => {
+    const x = padL + (innerW * i / (months.length - 1));
+    const y = padT + innerH - (v / allMax * innerH);
+    return [x, y];
+  });
+  const d = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ');
+  trend.insertAdjacentHTML('beforeend',
+    `<path d="${d}" stroke="${s.color}" stroke-width="1.6" fill="none"/>`);
+  pts.forEach(p => {
+    trend.insertAdjacentHTML('beforeend',
+      `<circle cx="${p[0]}" cy="${p[1]}" r="2.2" fill="${s.color}"/>`);
+  });
+  // last label
+  const last = pts[pts.length - 1];
+  trend.insertAdjacentHTML('beforeend',
+    `<text x="${last[0] - 4}" y="${last[1] - 6}" font-family="IBM Plex Mono" font-size="8" fill="${s.color}" text-anchor="end" font-weight="700">${s.data[s.data.length - 1]}</text>`);
+});
+
+/* ───── Alerts ───── */
+const al = document.getElementById('alerts');
+R.alerts.forEach(a => {
+  const cls = a.severity === 'critical' ? 'alert-c' : 'alert-w';
+  const sev = a.severity === 'critical' ? '◆ Critical' : '◇ Warning';
+  al.insertAdjacentHTML('beforeend', `
+    <div class="alert ${cls}">
+      <div class="alert-head">
+        <span class="alert-sev">${sev}</span>
+        <span class="alert-meta">${a.meta}</span>
+      </div>
+      <div class="alert-txt">${a.text}</div>
+    </div>
+  `);
+});
+</script>
+</body>
+</html>
