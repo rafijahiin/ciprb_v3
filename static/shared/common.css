@@ -1,0 +1,147 @@
+/* Shared chrome + pictogram helpers across all four report surfaces. */
+
+@import url('design-system.css');
+
+/* ─── Header / wordmark ─────────────────────────────────────── */
+.r-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px;
+  padding: 12px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  height: var(--header-h);
+  box-sizing: border-box;
+}
+.r-brand { display: flex; align-items: center; gap: 10px; }
+.r-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green-bright); box-shadow: var(--glow-green);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
+.r-wordmark {
+  font-family: var(--font-mono); font-weight: 600;
+  font-size: 0.9rem; letter-spacing: 0.1em;
+  color: var(--green);
+}
+.r-subwordmark {
+  font-family: var(--font-mono); font-size: var(--t-meta);
+  color: var(--fg-faint); letter-spacing: 0.08em;
+  border-left: 1px solid var(--border); padding-left: 10px; margin-left: 4px;
+}
+.r-meta {
+  font-family: var(--font-mono); font-size: var(--t-meta);
+  color: var(--fg-muted); letter-spacing: 0.06em;
+  display: flex; gap: 12px; align-items: center;
+}
+
+/* ─── Eyebrows ─────────────────────────────────────────────── */
+.eyebrow { font-family: var(--font-mono); font-size: var(--t-eyebrow);
+  text-transform: uppercase; letter-spacing: var(--track-eyebrow);
+  color: var(--fg-muted); font-weight: 500; }
+
+/* ─── Card ─────────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  padding: var(--pad-card);
+}
+.card-tight { padding: var(--pad-card-sm); }
+
+/* ─── Big number ───────────────────────────────────────────── */
+.num {
+  font-family: var(--font-mono);
+  font-weight: 600; line-height: 1;
+}
+.num-xl { font-size: 3rem; }
+.num-lg { font-size: 2.2rem; }
+.num-md { font-size: 1.6rem; }
+
+/* ─── Badges ───────────────────────────────────────────────── */
+.badge { display: inline-block;
+  padding: 2px 8px; border-radius: var(--r-badge);
+  font-family: var(--font-mono); font-size: var(--t-eyebrow);
+  text-transform: uppercase; letter-spacing: var(--track-badge);
+  font-weight: 600;
+}
+.badge-g { background: var(--tint-green); color: var(--green); }
+.badge-a { background: var(--tint-amber); color: var(--amber); }
+.badge-r { background: var(--tint-red);   color: var(--red);   }
+.badge-s { background: var(--tint-slate); color: var(--fg-muted); }
+
+/* ─── Color utilities by name (so we can pass color: 'green' from data) ─ */
+.c-green  { color: var(--green); }
+.c-amber  { color: var(--amber); }
+.c-red    { color: var(--red); }
+.c-blue   { color: var(--blue); }
+.c-purple { color: var(--purple); }
+.c-muted  { color: var(--fg-muted); }
+.c-faint  { color: var(--fg-faint); }
+
+.bg-green-5  { background: rgba(5,150,105,0.06); }
+.bg-amber-5  { background: var(--tint-amber-5); }
+.bg-red-5    { background: var(--tint-red-5); }
+.bg-blue-5   { background: rgba(37,99,235,0.06); }
+.bg-purple-5 { background: rgba(147,51,234,0.06); }
+
+/* ─── Buttons ──────────────────────────────────────────────── */
+.btn { display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: var(--r-input);
+  font-family: var(--font-mono); font-size: var(--t-meta);
+  text-transform: uppercase; letter-spacing: var(--track-nav);
+  font-weight: 500; cursor: pointer; border: 1px solid var(--border);
+  background: var(--surface); color: var(--fg);
+  transition: all var(--anim-fast);
+}
+.btn:hover { border-color: var(--fg-muted); color: var(--fg); }
+.btn-g { background: var(--green); color: #fff; border-color: var(--green); }
+.btn-g:hover { background: var(--green-2); border-color: var(--green-2); color: #fff; }
+
+/* ─── Mono table ───────────────────────────────────────────── */
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl th { text-align: left;
+  font-family: var(--font-mono); font-size: var(--t-eyebrow);
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-muted);
+  padding: var(--pad-cell); border-bottom: 1px solid var(--border);
+  font-weight: 500;
+}
+.tbl td { padding: var(--pad-cell); border-bottom: 1px solid var(--border);
+  font-size: var(--t-body); vertical-align: middle; }
+.tbl tr:last-child td { border-bottom: 0; }
+.tbl .id-cell { font-family: var(--font-mono); font-size: var(--t-meta); color: var(--fg-muted); }
+
+/* ─── Pipeline bar ─────────────────────────────────────────── */
+.pipe-row { display: grid; grid-template-columns: 1fr; gap: 6px; }
+.pipe-bar { position: relative; height: 36px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--r-input); overflow: hidden;
+}
+.pipe-fill { position: absolute; inset: 0 auto 0 0;
+  background: var(--green); opacity: 0.18; }
+.pipe-row .pipe-fill-red    { background: var(--red); }
+.pipe-row .pipe-fill-amber  { background: var(--amber); }
+.pipe-row .pipe-fill-green  { background: var(--green); }
+.pipe-label { position: relative; display: flex; align-items: center;
+  height: 100%; padding: 0 12px; justify-content: space-between;
+  font-family: var(--font-mono); font-size: var(--t-meta); letter-spacing: 0.04em;
+}
+.pipe-label .l { color: var(--fg); text-transform: uppercase; font-weight: 600; }
+.pipe-label .v { color: var(--fg); font-size: 1rem; font-weight: 700; }
+
+/* ─── Section heading ──────────────────────────────────────── */
+.r-section-title {
+  font-family: var(--font-mono); font-weight: 600; font-size: 0.95rem;
+  letter-spacing: 0.04em; color: var(--fg); margin: 0;
+}
+.r-section-rule {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 12px;
+}
+.r-section-rule::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ─── Tiny chart helpers ───────────────────────────────────── */
+.sparkline { stroke-width: 1.5; fill: none; }
+.spark-fill { opacity: 0.08; }
