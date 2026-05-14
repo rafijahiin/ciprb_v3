@@ -66,6 +66,76 @@
         .role-tag { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; background: rgba(255,255,255,0.2); color: white; }
         .empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
         .empty-state p { margin-bottom: 16px; font-size: 0.9rem; }
+
+        /* ── MOBILE RESPONSIVE ─────────────────────────────── */
+        .mob-grid-1 { grid-template-columns: 1fr !important; }
+        .mob-grid-2 { grid-template-columns: repeat(2,1fr) !important; }
+
+        @media (max-width: 768px) {
+            /* Header */
+            header { height: auto !important; flex-direction: column !important; padding: 10px 16px !important; gap: 8px !important; }
+            header > div:first-child span[style*="SRHR"] { display: none; }
+            nav { flex-wrap: wrap !important; justify-content: center; gap: 2px !important; width: 100%; }
+            .nav-btn { font-size: 0.72rem !important; padding: 5px 8px !important; }
+            header > div:last-child { width: 100%; justify-content: center !important; gap: 8px !important; }
+
+            /* Main padding */
+            main { padding: 12px !important; }
+
+            /* All fixed grids collapse */
+            [style*="grid-template-columns:repeat(4,1fr)"],
+            [style*="grid-template-columns:repeat(5,1fr)"],
+            [style*="grid-template-columns:repeat(3,1fr)"] {
+                grid-template-columns: repeat(2,1fr) !important;
+            }
+            [style*="grid-template-columns:1fr 1fr 1fr"],
+            [style*="grid-template-columns:1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Pipeline strip */
+            .pip-step { padding: 8px 4px !important; }
+            .pip-val { font-size: 1.4rem !important; }
+
+            /* Tables scroll horizontally */
+            table { display: block; overflow-x: auto; white-space: nowrap; }
+            th, td { padding: 8px 10px !important; font-size: 0.78rem !important; }
+
+            /* Stat numbers smaller */
+            .stat-num { font-size: 1.6rem !important; }
+
+            /* Cards padding */
+            .card { padding: 12px !important; }
+
+            /* Forms stack */
+            [style*="grid-template-columns:1fr 1fr;gap"] { grid-template-columns: 1fr !important; }
+
+            /* Report cards */
+            [style*="grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:16px"] { 
+                grid-template-columns: 1fr !important; 
+            }
+
+            /* Section header spacing */
+            .section-header { font-size: 0.65rem !important; }
+        }
+
+        @media (max-width: 480px) {
+            [style*="grid-template-columns:repeat(2,1fr)"],
+            [style*="grid-template-columns:repeat(4,1fr)"],
+            [style*="grid-template-columns:repeat(5,1fr)"],
+            [style*="grid-template-columns:repeat(3,1fr)"] {
+                grid-template-columns: 1fr !important;
+            }
+            .nav-btn { font-size: 0.68rem !important; padding: 4px 6px !important; }
+        }
+    </style>
+    <style>
+        @media (max-width: 640px) {
+            #mob-menu-btn { display: block !important; }
+            #mob-nav { display: none !important; width: 100%; flex-direction: column; background: rgba(0,0,0,0.2); border-radius: 4px; padding: 4px; }
+            #mob-nav.mob-open { display: flex !important; }
+            #mob-nav .nav-btn { text-align: left; border-radius: 3px; }
+        }
     </style>
 </head>
 <body>
@@ -83,7 +153,8 @@
             <span style="color:rgba(255,255,255,0.4);font-size:0.8rem;">· SRHR / RCH</span>
         </div>
     </div>
-    <nav style="display:flex;gap:2px;">
+    <button id="mob-menu-btn" onclick="document.getElementById('mob-nav').classList.toggle('mob-open')" style="display:none;background:rgba(255,255,255,0.15);border:none;color:white;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:1rem;">☰</button>
+    <nav id="mob-nav" style="display:flex;gap:2px;">
         <button class="nav-btn active" onclick="show('overview',this)">Overview</button>
         <button class="nav-btn" onclick="show('fistula',this)">Fistula</button>
         <button class="nav-btn" onclick="show('mpdsr',this)">MPDSR</button>
