@@ -7,10 +7,6 @@ class Migration(migrations.Migration):
         ('reports', '0001_initial'),
     ]
     operations = [
-        migrations.AddConstraint(
-            model_name='monthlynewsletter',
-            constraint=models.UniqueConstraint(fields=['month', 'year'], name='unique_newsletter_month_year'),
-        ),
         migrations.CreateModel(
             name='MonthlyReport',
             fields=[
@@ -26,5 +22,15 @@ class Migration(migrations.Migration):
         migrations.AlterUniqueTogether(
             name='monthlyreport',
             unique_together={('month', 'year')},
+        ),
+        migrations.AlterField(
+            model_name='monthlynewsletter',
+            name='month',
+            field=models.IntegerField(),
+        ),
+        migrations.AlterField(
+            model_name='monthlynewsletter',
+            name='year',
+            field=models.IntegerField(),
         ),
     ]
