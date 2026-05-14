@@ -53,17 +53,17 @@ def _get_pdf_context():
 
 
 def export_pdf(request):
-    ctx = _get_pdf_context()
-    html_string = render_to_string('one_pager.html', ctx)
-    pdf = HTML(string=html_string).write_pdf()
-    month_name = ctx['month_name']
-    year = ctx['year']
-    response = HttpResponse(pdf, content_type='application/pdf')
-    response['Content-Disposition'] = f'inline; filename="CIPRB_MnE_Report_{month_name}_{year}.pdf"'
-    return response
+    # Redirect to the Claude Design one-pager which has a Print/PDF button
+    from django.shortcuts import redirect
+    return redirect('/reports/design/one-pager/')
 
 
 def export_ppt(request):
+    # Redirect to the Claude Design 11-slide deck which has keyboard nav + print
+    from django.shortcuts import redirect
+    return redirect('/reports/design/deck/')
+
+def _export_ppt_legacy(request):
     prs = Presentation()
     prs.slide_width = Inches(13.33)
     prs.slide_height = Inches(7.5)
