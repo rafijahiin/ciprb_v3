@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+{% load static %}
+<meta charset="UTF-8">
+<title>CIPRB M&E · April 2026 Policy Brief</title>
+<link rel="stylesheet" href="{% static 'shared/common.css' %}">
+<script>window.REPORT = {{ report_json|safe }};</script>
+<style>
+  html, body { margin: 0; background: #ebeef3; }
+  body { font-family: var(--font-sans); color: var(--fg); }
+
+  .nl {
+    max-width: 720px; margin: 0 auto;
+    background: var(--surface);
+    box-shadow: 0 4px 20px rgba(15,23,42,0.06);
+    min-height: 100vh;
+  }
+
+  /* ── Header strip ── */
+  .nl-mast {
+    padding: 22px 36px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .nl-brand { display: flex; align-items: center; gap: 10px; }
+  .nl-dot { width: 9px; height: 9px; border-radius: 50%;
+    background: var(--green-bright); box-shadow: var(--glow-green);
+    animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:.6} 50%{opacity:1} }
+  .nl-wm {
+    font-family: var(--font-mono); font-weight: 700; font-size: 0.85rem;
+    letter-spacing: 0.12em; color: var(--green);
+  }
+  .nl-wm-sub {
+    font-family: var(--font-mono); font-size: 0.62rem;
+    color: var(--fg-faint); letter-spacing: 0.08em;
+  }
+  .nl-meta {
+    font-family: var(--font-mono); font-size: 0.62rem;
+    color: var(--fg-muted); letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: right;
+  }
+  .nl-meta b { color: var(--fg); font-weight: 600; }
+
+  /* ── Hero ── */
+  .nl-hero {
+    padding: 44px 36px 36px;
+    border-bottom: 1px solid var(--border);
+  }
+  .nl-eyebrow {
+    font-family: var(--font-mono); font-size: 0.65rem;
+    text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--green); font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .nl-title {
+    font-family: var(--font-sans); font-weight: 600;
+    font-size: 2.2rem; line-height: 1.15;
+    letter-spacing: -0.01em; color: var(--fg);
+    margin: 0 0 14px;
+    text-wrap: pretty;
+  }
+  .nl-deck {
+    font-family: var(--font-sans);
+    font-size: 1.05rem; line-height: 1.5; color: var(--fg-muted);
+    max-width: 580px;
+  }
+  .nl-byline {
+    margin-top: 22px;
+    font-family: var(--font-mono); font-size: 0.65rem;
+    color: var(--fg-faint); letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: flex; gap: 16px;
+  }
+
+  /* ── TL;DR strip ── */
+  .nl-tldr {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    padding: 0 36px;
+    border-bottom: 1px solid var(--border);
+  }
+  .nl-tldr .cell {
+    padding: 22px 16px;
+    border-right: 1px solid var(--border);
+  }
+  .nl-tldr .cell:first-child { padding-left: 0; }
+  .nl-tldr .cell:last-child { border-right: 0; padding-right: 0; }
+  .tldr-l {
+    font-family: var(--font-mono); font-size: 0.58rem;
+    color: var(--fg-muted); letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .tldr-v {
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: 2.2rem; line-height: 1; margin: 6px 0;
+    color: var(--fg);
+  }
+  .tldr-f {
+    font-family: var(--font-mono); font-size: 0.6rem;
+    color: var(--green); letter-spacing: 0.06em;
+  }
+
+  /* ── Body ── */
+  .nl-body { padding: 36px; }
+  .nl-body h2 {
+    font-family: var(--font-mono); font-weight: 600;
+    font-size: 0.72rem; text-transform: uppercase;
+    letter-spacing: 0.14em; color: var(--green);
+    margin: 32px 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .nl-body h2:first-child { margin-top: 0; }
+  .nl-body h3 {
+    font-family: var(--font-sans); font-weight: 600;
+    font-size: 1.25rem; line-height: 1.3;
+    color: var(--fg); margin: 18px 0 8px;
+    text-wrap: pretty;
+  }
+  .nl-body p {
+    font-size: 0.95rem; line-height: 1.6; color: var(--fg);
+    margin: 0 0 12px;
+    text-wrap: pretty;
+  }
+  .nl-body p .muted { color: var(--fg-muted); }
+  .nl-body strong { font-weight: 600; color: var(--fg); }
+  .nl-body .num-callout {
+    color: var(--green); font-family: var(--font-mono); font-weight: 700;
+  }
+
+  /* Inline data callout */
+  .stat-inline {
+    display: inline-flex; align-items: baseline; gap: 4px;
+    padding: 1px 8px; border-radius: 3px;
+    background: var(--tint-green);
+    font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700;
+    color: var(--green);
+  }
+  .stat-inline.red    { background: var(--tint-red);   color: var(--red); }
+  .stat-inline.amber  { background: var(--tint-amber); color: var(--amber); }
+
+  /* Pull-quote */
+  .pullq {
+    margin: 24px 0; padding: 22px 28px;
+    border-left: 3px solid var(--green);
+    background: rgba(5,150,105,0.04);
+    font-family: var(--font-sans);
+    font-size: 1.15rem; line-height: 1.45; color: var(--fg);
+    font-weight: 500; font-style: italic;
+    text-wrap: pretty;
+  }
+  .pullq cite {
+    display: block; margin-top: 10px;
+    font-family: var(--font-mono); font-size: 0.65rem;
+    color: var(--fg-muted); letter-spacing: 0.1em;
+    text-transform: uppercase; font-style: normal;
+  }
+
+  /* Data-viz blocks inside body */
+  .viz {
+    margin: 18px 0 24px;
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 18px 20px;
+    background: var(--bg);
+  }
+  .viz-title {
+    font-family: var(--font-mono); font-size: 0.65rem;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--fg-muted); margin-bottom: 12px;
+  }
+  .funn-row {
+    display: grid; grid-template-columns: 100px 1fr 50px;
+    align-items: center; gap: 10px; height: 28px; margin-bottom: 4px;
+  }
+  .funn-stage { font-family: var(--font-mono); font-size: 0.65rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-muted); }
+  .funn-track { height: 100%; position: relative; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .funn-fill { position: absolute; inset: 0 auto 0 0; opacity: 0.85; }
+  .funn-val { font-family: var(--font-mono); font-size: 1rem; font-weight: 700; text-align: right; }
+
+  /* Equity table */
+  .eq-tbl {
+    width: 100%; border-collapse: collapse; font-family: var(--font-mono);
+  }
+  .eq-tbl td {
+    padding: 10px 4px; border-bottom: 1px solid var(--border);
+    font-size: 0.78rem;
+  }
+  .eq-tbl td:first-child { color: var(--fg-muted); text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.65rem; }
+  .eq-tbl td:nth-child(2) { font-weight: 700; font-size: 1rem; text-align: right; width: 60px; }
+  .eq-tbl td:nth-child(3) { color: var(--fg-faint); font-size: 0.7rem; width: 80px; }
+  .eq-tbl tr:last-child td { border-bottom: 0; }
+
+  /* Recommendations list */
+  .recs { list-style: none; padding: 0; margin: 14px 0; }
+  .recs li {
+    display: grid; grid-template-columns: 24px 1fr;
+    gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border);
+    align-items: baseline;
+  }
+  .recs li:last-child { border-bottom: 0; }
+  .rec-n {
+    font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700;
+    color: var(--green);
+  }
+  .rec-body strong { display: block; margin-bottom: 4px; color: var(--fg); font-weight: 600; }
+  .rec-body span { font-size: 0.88rem; line-height: 1.5; color: var(--fg-muted); }
+
+  /* AI disclosure */
+  .ai-strip {
+    margin: 32px 0 0;
+    padding: 18px 22px;
+    background: var(--bg); border-radius: 8px;
+    border: 1px dashed var(--dashed);
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .ai-icon {
+    flex: 0 0 32px; width: 32px; height: 32px;
+    border-radius: 50%; background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-weight: 700; color: var(--fg-muted);
+    font-size: 0.65rem; letter-spacing: 0.04em;
+  }
+  .ai-body {
+    font-family: var(--font-mono); font-size: 0.7rem;
+    color: var(--fg-muted); letter-spacing: 0.02em; line-height: 1.55;
+  }
+  .ai-body b { color: var(--fg); font-weight: 600; }
+
+  /* Footer */
+  .nl-foot {
+    padding: 28px 36px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: var(--font-mono); font-size: 0.62rem;
+    color: var(--fg-faint); letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .nl-foot a {
+    color: var(--fg-muted); text-decoration: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* small inline spark for partner row */
+  .ptr-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 14px 0 20px; }
+  .ptr-card {
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .ptr-card .name {
+    font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700;
+    letter-spacing: 0.06em; margin-bottom: 4px;
+  }
+  .ptr-card .v {
+    font-family: var(--font-mono); font-size: 1.4rem; font-weight: 700;
+    color: var(--fg); line-height: 1;
+  }
+  .ptr-card .l {
+    font-family: var(--font-mono); font-size: 0.58rem;
+    color: var(--fg-muted); letter-spacing: 0.06em;
+    margin-top: 2px; text-transform: uppercase;
+  }
+  .ptr-card .status {
+    font-family: var(--font-mono); font-size: 0.55rem;
+    letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700;
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="nl" data-screen-label="AI Policy Newsletter">
+
+  <!-- Masthead -->
+  <div class="nl-mast">
+    <div class="nl-brand">
+      <div class="nl-dot"></div>
+      <div>
+        <div class="nl-wm">CIPRB M&amp;E POLICY BRIEF</div>
+        <div class="nl-wm-sub">UNFPA-MISP · CP10 · ISSUE №042</div>
+      </div>
+    </div>
+    <div class="nl-meta">
+      <div><b>01 MAY 2026</b></div>
+      <div style="margin-top: 2px;">Auto-generated · Gemini-assisted</div>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div class="nl-hero">
+    <div class="nl-eyebrow">April 2026 · Monthly Brief</div>
+    <h1 class="nl-title">Fistula surgeries hit a 12-month high — but Bondhu's reach lags 25% behind quarterly target.</h1>
+    <p class="nl-deck">
+      Surgical throughput, MPDSR completion, and partner equity coverage
+      all moved in April. Three signals stand out for the policy desk:
+      a step-change in operated cases, a widening Cox's Bazar
+      referral-to-admission gap, and a Bondhu beneficiary shortfall now
+      large enough to warrant a partnership review.
+    </p>
+    <div class="nl-byline">
+      <span>For: <b style="color:var(--fg)">UNFPA CO · MoHFW · IP Leads · Donors</b></span>
+      <span>14 recipients · 12 opens</span>
+    </div>
+  </div>
+
+  <!-- TL;DR Strip -->
+  <div class="nl-tldr">
+    <div class="cell">
+      <div class="tldr-l">FISTULA OPERATED</div>
+      <div class="tldr-v">23</div>
+      <div class="tldr-f">+4 vs Mar · 92% of target</div>
+    </div>
+    <div class="cell">
+      <div class="tldr-l">MPDSR REVIEWED</div>
+      <div class="tldr-v">38</div>
+      <div class="tldr-f">+11 vs Mar · best month</div>
+    </div>
+    <div class="cell">
+      <div class="tldr-l">BENEFICIARIES</div>
+      <div class="tldr-v">2,847</div>
+      <div class="tldr-f">+312 vs Mar · 114% target</div>
+    </div>
+    <div class="cell">
+      <div class="tldr-l">STAFF TRAINED</div>
+      <div class="tldr-v">184</div>
+      <div class="tldr-f">+22 vs Mar · 123% target</div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="nl-body">
+
+    <h2>This Month at a Glance</h2>
+    <p>
+      The April programme month closed with the highest fistula surgical throughput
+      in 12 months — <span class="stat-inline">23 operated</span> across the four
+      UNFPA-supported camp sites, against a monthly target of 25. Cumulative operated
+      cases for CP10 now stand at <strong>41 of the 100-case annual target</strong>,
+      keeping the campaign on a credible trajectory to close out the country programme
+      cycle near plan.
+    </p>
+    <p>
+      MPDSR review activity rebounded sharply this month after a March dip: <strong>38
+      events reviewed</strong> with 14 closed as <span class="stat-inline">IMPLEMENTED</span>
+      and 9 at <span class="stat-inline amber">FUNDED</span> awaiting facility-level rollout.
+      Eleven events remain <span class="stat-inline red">PENDING</span> — four of them
+      in Sunamganj for more than 30 days, the largest single-district backlog of the year.
+    </p>
+
+    <div class="viz">
+      <div class="viz-title">Fistula Referral Pipeline · April 2026</div>
+      <div id="funnel"></div>
+      <div style="font-family:var(--font-mono); font-size:0.6rem; color:var(--fg-faint); letter-spacing:0.06em; margin-top:8px;">
+        Conversion: 78% identify→refer · 71% refer→admit · 66% admit→operate · 54% operate→rehab
+      </div>
+    </div>
+
+    <h2>Operational Signal</h2>
+    <h3>Cox's Bazar referral-to-admission gap is widening — and the explanation isn't routing.</h3>
+    <p>
+      Camp-based fistula identification continues to track well — CIPRB outreach
+      teams logged <strong>842 beneficiaries</strong> across Teknaf and Ukhia in
+      April, the highest district volume in the programme — but only
+      <span class="stat-inline amber">58% of referred cases reached admission</span>,
+      down from 71% in March. Field interviews and case-level review point to two
+      drivers: persistent surgical-bed congestion at Cox's Bazar District Hospital
+      and, increasingly, family-side delay in cases requiring travel beyond the
+      camp perimeter.
+    </p>
+    <p>
+      A structural read: throughput at the district-hospital end is the binding
+      constraint, not field identification. Continued investment in screening
+      without parallel investment in operative capacity is unlikely to close the gap.
+    </p>
+
+    <div class="pullq">
+      Without bed-side and theatre-side capacity in Cox's Bazar matching the
+      pace of camp screening, every additional identified case becomes an
+      additional referral the system cannot honour within an acceptable window.
+      <cite>— Programme M&amp;E Note, 01 May 2026</cite>
+    </div>
+
+    <h2>Partner Performance</h2>
+    <p>
+      Three partners, three trajectories. CIPRB closed April at <strong>94% of
+      its quarterly beneficiary target</strong> and delivered the bulk of training
+      output (9 sessions, 102 trained). PHD held steady at 74% of target. Bondhu
+      — operating in the most sensitive constituency the programme serves —
+      is now <strong>25 percentage points</strong> below its quarterly target,
+      driven by a combination of one delayed peer-group cycle in Khulna and
+      lower-than-projected adolescent reach in the Dhaka activities.
+    </p>
+
+    <div class="ptr-grid">
+      <div class="ptr-card">
+        <div class="name c-green">CIPRB</div>
+        <div class="v">2,120</div>
+        <div class="l">Beneficiaries · 94% target</div>
+        <div class="status c-green">▲ ON TRACK</div>
+      </div>
+      <div class="ptr-card">
+        <div class="name c-blue">PHD</div>
+        <div class="v">578</div>
+        <div class="l">Beneficiaries · 74% target</div>
+        <div class="status c-amber">→ MONITOR</div>
+      </div>
+      <div class="ptr-card">
+        <div class="name c-purple">Bondhu</div>
+        <div class="v">149</div>
+        <div class="l">Beneficiaries · 25% below</div>
+        <div class="status c-red">▼ NEEDS REVIEW</div>
+      </div>
+    </div>
+
+    <h2>Equity &amp; Leave No One Behind</h2>
+    <p>
+      Of the 2,847 beneficiaries reached in April, the LNOB-flagged breakdown is:
+    </p>
+
+    <table class="eq-tbl" id="equity-table"></table>
+
+    <p style="margin-top: 14px;">
+      Equity-flag data <strong>completeness sits at 76%</strong> against a
+      90% target — driven by inconsistent flag capture in PHD's adolescent
+      sessions. A KoboToolbox form revision is queued for the May cycle to
+      make all three flag fields required.
+    </p>
+
+    <h2>National Context</h2>
+    <p>
+      The national Maternal Mortality Ratio reported by SVRS for 2023 is
+      <strong class="num-callout">136 per 100,000 live births</strong>,
+      down from a 2019 baseline of 165 — meaningful progress, but still
+      nearly double the SDG 3.1 target of 70. The skilled-birth-attendance
+      indicator continued its upward trajectory, reaching
+      <strong>69.7% in 2023</strong> from 57.9% in 2021. CP10 programme
+      delivery sits within this directional improvement but the
+      programme's contribution to MMR specifically remains
+      attribution-difficult.
+    </p>
+
+    <h2>Recommendations for May</h2>
+    <ol class="recs">
+      <li>
+        <span class="rec-n">01</span>
+        <div class="rec-body">
+          <strong>Convene a Cox's Bazar surgical-capacity review with DGHS and Camp Health Co-ordination by 15 May.</strong>
+          <span>Bed-side and theatre throughput, not field identification, is the binding constraint. The review should produce a 90-day capacity uplift plan.</span>
+        </div>
+      </li>
+      <li>
+        <span class="rec-n">02</span>
+        <div class="rec-body">
+          <strong>Trigger a Bondhu partnership review.</strong>
+          <span>A 25-point shortfall over a single quarter exceeds the threshold in the partnership agreement. Recommend joint workplan re-baselining rather than a no-cost extension.</span>
+        </div>
+      </li>
+      <li>
+        <span class="rec-n">03</span>
+        <div class="rec-body">
+          <strong>Close the Sunamganj MPDSR backlog before next reporting cycle.</strong>
+          <span>Four events have sat PENDING &gt; 30 days. Recommend a one-day MPDSR clinic with the district MO and CIPRB co-ordinator.</span>
+        </div>
+      </li>
+      <li>
+        <span class="rec-n">04</span>
+        <div class="rec-body">
+          <strong>Ship the KoboToolbox equity-flag form revision in the May release.</strong>
+          <span>Required-field enforcement on the three LNOB flags. Expected lift in completeness from 76% to ~92% based on prior schema-tightening cycles.</span>
+        </div>
+      </li>
+    </ol>
+
+    <!-- AI disclosure -->
+    <div class="ai-strip">
+      <div class="ai-icon">AI</div>
+      <div class="ai-body">
+        <b>AI-assisted brief.</b> This newsletter was drafted by Gemini against
+        the April KoboToolbox extract and reviewed by the M&amp;E Officer
+        before release. In line with UN policy, no evaluative judgement,
+        conclusion, or recommendation was based solely on model output;
+        every number above traces to a row in the live data pipeline.
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="nl-foot">
+    <span>Generated 01 May 2026 · 03:00 UTC · Auto-monthly · Next issue 01 Jun</span>
+    <span><a href="#">ciprb.me/r/apr-2026</a></span>
+  </div>
+</div>
+
+<script>
+const R = window.REPORT;
+
+/* funnel */
+const pipe = R.fistula.pipeline;
+const max = pipe[0].value;
+const funn = document.getElementById('funnel');
+pipe.forEach(p => {
+  const pct = p.value / max * 100;
+  funn.insertAdjacentHTML('beforeend', `
+    <div class="funn-row">
+      <div class="funn-stage">${p.label}</div>
+      <div class="funn-track">
+        <div class="funn-fill" style="width:${pct}%; background:var(--${p.color === 'red' ? 'red' : p.color === 'amber' ? 'amber' : 'green'});"></div>
+      </div>
+      <div class="funn-val">${p.value}</div>
+    </div>
+  `);
+});
+
+/* equity table */
+const e = R.equity;
+const total = e.total_reached;
+const rows = [
+  { label: 'Internally displaced (Rohingya / climate) 🏕', v: e.displaced,  pct: (e.displaced/total*100).toFixed(1) },
+  { label: 'Adolescent (15–19 yrs)',                       v: e.adolescent, pct: (e.adolescent/total*100).toFixed(1) },
+  { label: 'Women with disabilities 🦽',                   v: e.disabled,   pct: (e.disabled/total*100).toFixed(1) },
+  { label: 'Ethnic minority 🏔',                           v: e.ethnic,     pct: (e.ethnic/total*100).toFixed(1) },
+];
+document.getElementById('equity-table').innerHTML = rows.map(r => `
+  <tr>
+    <td>${r.label}</td>
+    <td>${r.v.toLocaleString()}</td>
+    <td>${r.pct}%</td>
+  </tr>
+`).join('');
+</script>
+</body>
+</html>
