@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Report Archive — CIPRB M&E</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Source Sans 3', sans-serif; background: #F5F7FA; color: #2D3748; margin: 0; }
+        .header { background: #1A3668; padding: 16px 32px; color: white; }
+        .header h1 { font-size: 1.2rem; font-weight: 700; margin: 0; }
+        .header p { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-top: 2px; }
+        .main { max-width: 900px; margin: 32px auto; padding: 0 24px; }
+        .card { background: white; border: 1px solid #E2E8F0; border-radius: 6px; padding: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .card h3 { font-size: 1rem; font-weight: 700; color: #1A3668; margin: 0; }
+        .card p { font-size: 0.8rem; color: #718096; margin: 3px 0 0; }
+        .btn { padding: 7px 16px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; text-decoration: none; border: none; font-family: inherit; cursor: pointer; }
+        .btn-blue { background: #009EDB; color: white; }
+        .btn-outline { background: transparent; border: 1px solid #E2E8F0; color: #718096; }
+        .section-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #718096; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #009EDB; display: inline-block; }
+        .generate-box { background: #EBF8FF; border: 1px solid #BEE3F8; border-radius: 6px; padding: 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+        .back-link { color: #009EDB; text-decoration: none; font-size: 0.85rem; display: inline-block; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>Report Archive — CIPRB M&E</h1>
+    <p>UNFPA Bangladesh · SRHR/RCH Programme</p>
+</div>
+<div class="main">
+    <a href="/dashboard/" class="back-link">← Back to Dashboard</a>
+    <div class="generate-box">
+        <div>
+            <p><strong>Generate Current Month Report</strong></p>
+            <small style="color:#718096;font-size:0.78rem;">Creates newsletter, PDF and deck for current month data</small>
+        </div>
+        <div style="display:flex;gap:8px;">
+            <a href="/reports/design/one-pager/" target="_blank" class="btn btn-blue">📄 One-Pager</a>
+            <a href="/reports/design/deck/" target="_blank" class="btn btn-blue">📊 Deck</a>
+            <a href="/reports/generate-newsletter/" class="btn btn-outline">✉ Newsletter</a>
+        </div>
+    </div>
+    <div class="section-title">Past Newsletters</div>
+    {% for n in newsletters %}
+    <div class="card">
+        <div>
+            <h3>{{ n.month }}/{{ n.year }} — Policy Advocacy Newsletter</h3>
+            <p>Generated: {{ n.created_at|date:"d M Y, H:i" }}</p>
+        </div>
+        <a href="/reports/generate-newsletter/" class="btn btn-blue">Regenerate</a>
+    </div>
+    {% empty %}
+    <p style="color:#718096;font-size:0.85rem;">No newsletters generated yet.</p>
+    {% endfor %}
+</div>
+</body>
+</html>
