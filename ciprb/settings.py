@@ -4,20 +4,12 @@ from pathlib import Path
 import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-me-in-production')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+
 _allowed = os.environ.get('ALLOWED_HOSTS', '')
 ALLOWED_HOSTS = _allowed.split(',') if _allowed else []
-ALLOWED_HOSTS += ['localhost', '127.0.0.1']
-# Accept all Railway and Render subdomains
-ALLOWED_HOSTS += ['.railway.app', '.onrender.com', '.up.railway.app']
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-_allowed = os.environ.get('ALLOWED_HOSTS', '')
-ALLOWED_HOSTS = _allowed.split(',') if _allowed else []
-ALLOWED_HOSTS += ['localhost', '127.0.0.1']
-# Accept all Railway and Render subdomains
-ALLOWED_HOSTS += ['.railway.app', '.onrender.com', '.up.railway.app']
+ALLOWED_HOSTS += ['localhost', '127.0.0.1', '.railway.app', '.onrender.com', '.up.railway.app']
 
 CSRF_TRUSTED_ORIGINS = [
     'https://ciprbv3-production.up.railway.app',
