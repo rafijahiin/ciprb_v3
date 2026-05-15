@@ -7,7 +7,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-me-in-production')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'ciprb-mne-dashboard-v2.onrender.com,localhost,127.0.0.1').split(',')
+_allowed = os.environ.get('ALLOWED_HOSTS', '')
+ALLOWED_HOSTS = _allowed.split(',') if _allowed else []
+ALLOWED_HOSTS += ['localhost', '127.0.0.1']
+# Accept all Railway and Render subdomains
+ALLOWED_HOSTS += ['.railway.app', '.onrender.com', '.up.railway.app']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
