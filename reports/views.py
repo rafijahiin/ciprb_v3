@@ -2,11 +2,6 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils import timezone
-from io import BytesIO
-from pptx import Presentation
-from pptx.util import Inches, Pt
-from pptx.dml.color import RGBColor
-from weasyprint import HTML
 from tracker.models import FistulaCase
 from mpdsr.models import MPDSREvent
 from activities.models import ActivityLog
