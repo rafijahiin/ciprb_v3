@@ -4,6 +4,6 @@ gunicorn
 whitenoise
 djangorestframework
 psycopg2-binary
-weasyprint
-python-pptx
+requests
 google-genai
+python-pptx
